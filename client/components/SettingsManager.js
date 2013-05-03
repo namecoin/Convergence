@@ -31,6 +31,8 @@ function SettingsManager() {
   this.connectivityIsFailureEnabled = true;
   this.privateIpExempt              = true;
   this.privatePkiExempt             = true;
+  this.namecoinBlockchain           = true;
+  this.namecoinOnly                 = true;
   this.maxNotaryQuorum              = 3;
   this.verificationThreshold        = "majority";
   this.notaries                     = new Array();
@@ -77,6 +79,22 @@ SettingsManager.prototype.setPrivatePkiExempt = function(val) {
 
 SettingsManager.prototype.getPrivatePkiExempt = function() {
   return this.privatePkiExempt;
+};
+
+SettingsManager.prototype.setNamecoinBlockchain = function(val) {
+  this.namecoinBlockchain = val;
+};
+
+SettingsManager.prototype.getNamecoinBlockchain = function() {
+  return this.namecoinBlockchain;
+};
+
+SettingsManager.prototype.setNamecoinOnly = function(val) {
+  this.namecoinOnly = val;
+};
+
+SettingsManager.prototype.getNamecoinOnly = function() {
+  return this.namecoinOnly;
 };
 
 SettingsManager.prototype.setVerificationThreshold = function(val) {
@@ -155,7 +173,9 @@ SettingsManager.prototype.getSerializedSettings = function() {
     'connectivityIsFailureEnabled' : this.connectivityIsFailureEnabled,
     'verificationThreshold'        : this.verificationThreshold,
     'maxNotaryQuorum'              : this.maxNotaryQuorum,
-    'privatePkiExempt'             : this.privatePkiExempt
+    'privatePkiExempt'             : this.privatePkiExempt,
+	'namecoinBlockchain'           : this.namecoinBlockchain,
+	'namecoinOnly'                 : this.namecoinOnly
   };
 };
 
@@ -254,6 +274,8 @@ SettingsManager.prototype.savePreferences = function() {
   rootElement.setAttribute("connectivity_failure", this.connectivityIsFailureEnabled);
   rootElement.setAttribute("private_pki_exempt", this.privatePkiExempt);
   rootElement.setAttribute("private_ip_exempt", this.privateIpExempt);
+  rootElement.setAttribute("namecoin_blockchain", this.namecoinBlockchain);
+  rootElement.setAttribute("namecoin_only", this.namecoinOnly);
   rootElement.setAttribute("threshold", this.verificationThreshold);
   rootElement.setAttribute("max_notary_quorum", this.maxNotaryQuorum);
   rootElement.setAttribute("version", 1);
@@ -379,6 +401,8 @@ SettingsManager.prototype.loadPreferences = function() {
   this.connectivityIsFailureEnabled = (rootElement.item(0).getAttribute("connectivity_failure") == "true");
   this.privateIpExempt              = (rootElement.item(0).getAttribute("private_ip_exempt") == "true");
   this.privatePkiExempt             = (rootElement.item(0).getAttribute("private_pki_exempt") == "true");
+  this.namecoinBlockchain           = (rootElement.item(0).getAttribute("namecoin_blockchain") == "false");
+  this.namecoinonly                 = (rootElement.item(0).getAttribute("namecoin_only") == "false");
   this.verificationThreshold        = rootElement.item(0).getAttribute("threshold");
   this.maxNotaryQuorum              = rootElement.item(0).getAttribute("max_notary_quorum");
   this.version                      = rootElement.item(0).getAttribute("version");
@@ -401,6 +425,14 @@ SettingsManager.prototype.loadPreferences = function() {
 
   if (!rootElement.item(0).hasAttribute("private_ip_exempt")) {
     this.privateIpExempt = true;
+  }
+  
+  if (!rootElement.item(0).hasAttribute("namecoin_blockchain")) {
+    this.namecoinBlockchain = false;
+  }
+  
+  if (!rootElement.item(0).hasAttribute("namecoin_only")) {
+    this.namecoinOnly = false;
   }
 
   if (!rootElement.item(0).hasAttribute("threshold")) {

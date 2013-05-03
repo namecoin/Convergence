@@ -45,6 +45,8 @@
 	<checkbox id="connectivity-failure" label="Notary connectivity failure counts as authenticity failure."/>
 	<checkbox id="private-ip-exempt" label="Don't check RFC 1918 (private) IP addresses." />
 	<checkbox id="private-pki-exempt" label="Whitelist private PKI signatures." />
+	<checkbox id="namecoin-blockchain" label="Verify Namecoin (.bit) domains against the blockchain (requires namecoind and nmcontrol)." />
+	<checkbox id="namecoin-only" label="Only verify Namecoin (.bit) domains (other domains will revert to CA verification)." />
 
 	<groupbox>
 	  <caption label="Verification Threshold"/>

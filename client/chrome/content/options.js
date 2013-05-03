@@ -41,6 +41,8 @@ function onOptionsSave() {
   settingsManager.setMaxNotaryQuorum(document.getElementById("notary-quorum").value);
   settingsManager.setPrivatePkiExempt(document.getElementById("private-pki-exempt").checked);
   settingsManager.setPrivateIpExempt(document.getElementById("private-ip-exempt").checked);
+  settingsManager.setNamecoinBlockchain(document.getElementById("namecoin-blockchain").checked);
+  settingsManager.setNamecoinOnly(document.getElementById("namecoin-only").checked);
 
   settingsManager.setNotaryList(notaries);
   settingsManager.savePreferences();  
@@ -136,6 +138,8 @@ function updateAdvancedSettings() {
   var maxQuorum                    = convergence.getSettingsManager().getMaxNotaryQuorum();
   var privateIpExempt              = convergence.getSettingsManager().getPrivateIpExempt();
   var privatePkiExempt             = convergence.getSettingsManager().getPrivatePkiExempt();
+  var namecoinBlockchain           = convergence.getSettingsManager().getNamecoinBlockchain();
+  var namecoinOnly                 = convergence.getSettingsManager().getNamecoinOnly();
 
   document.getElementById("cache-certificates").checked   = cacheCertificatesEnabled;
   document.getElementById("notary-bounce").checked        = notaryBounceEnabled;
@@ -144,6 +148,8 @@ function updateAdvancedSettings() {
   document.getElementById("notary-quorum").value          = maxQuorum;
   document.getElementById("private-ip-exempt").checked    = privateIpExempt;
   document.getElementById("private-pki-exempt").checked   = privatePkiExempt;
+  document.getElementById("namecoin-blockchain").checked  = namecoinBlockchain;
+  document.getElementById("namecoin-only").checked  = namecoinOnly;
 };
 
 function updateCacheSettings(sortColumn, sortDirection) {
