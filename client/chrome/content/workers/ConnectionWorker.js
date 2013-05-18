@@ -59,8 +59,45 @@ function sendClientResponse(localSocket, certificateManager, certificateInfo) {
   localSocket.negotiateSSL(certificateManager, certificateInfo);
 };
 
+// ToDo: finish this
+function getNamecoinFingerprint(host) {
+	var http = new XMLHttpRequest();
+	var url = "http://127.0.0.1:9000/";
+	
+	var hostSplit = host.split(".").reverse();
+	
+	var params = {jsonrpc: "1.0",method: "data", params: ["getValue", "d/"+(hostSplit[1])], id: "jsonrpc"};
+	
+	var domainData;
+	
+	http.open("POST", url, false);
+	
+	//Send the proper header information along with the request
+	http.setRequestHeader("Content-type", "text/x-json");
+	http.setRequestHeader("Content-length", params.length);
+	http.setRequestHeader("Connection", "close");
+	
+	http.send(JSON.stringify(params));
+	
+	if(http.status == 200) {
+		domainData = JSON.parse(http.responseText);
+		
+		if(domainData["fingerprint"]) {
+			dump("Found fingerprint in blockchain.");
+			return domainData["fingerprint"];
+		}
+		else {
+			dump("No fingerprint in blockchain!\n");
+			return null;
+		}
+	} else {
+		dump("NMControl error!\n")
+		return null;
+	}
+}
+
 function checkCertificateValidity(certificateCache, activeNotaries, host, port, 
-				  certificateInfo, privatePkiExempt) 
+				  certificateInfo, privatePkiExempt, namecoinBlockchain) 
 {
   var target = host + ":" + port;
 
@@ -81,6 +118,34 @@ function checkCertificateValidity(certificateCache, activeNotaries, host, port,
 	    'certificate' : certificateInfo.original,
 	    'details' : [{'notary' : 'Certificate Cache', 
 		          'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS}]};
+
+  if(namecoinBlockchain && host.substr(-4) == ".bit") {
+    dump("Checking Namecoin blockchain...\n");
+	
+	var namecoinFingerprints = getNamecoinFingerprint(host);
+	
+	if(Array.isArray(namecoinFingerprints) && namecoinFingerprints.indexOf(certificateInfo.sha1) != -1)
+	{
+		dump("Fingerprint matched blockchain.\n");
+		
+		// Fingerprint found
+		return {'status'      : true,
+			'target'      : target,
+			'certificate' : certificateInfo.original,
+			'details'     : [{'notary' : 'Namecoin',
+			'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS}]};
+	}
+	else
+	{
+		dump("Fingerprint did not match blockchain.\n");
+		// Fingerprint not found
+		return {'status'      : false,
+			'target'      : target,
+			'certificate' : certificateInfo.original,
+			'details'     : [{'notary' : 'Namecoin',
+			'status' : ConvergenceResponseStatus.VERIFICATION_FAILURE}]};
+	}
+  }
 
   dump("Not cached, checking notaries: " + certificateInfo.sha1 + "\n");
   var results = activeNotaries.checkValidity(host, port, certificateInfo);
@@ -121,7 +186,7 @@ onmessage = function(event) {
 
     var results = this.checkCertificateValidity(certificateCache, activeNotaries,
 						destination.host, destination.port,
-						certificateInfo, event.data.settings['privatePkiExempt']);
+						certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain']);
 
     if (results['status'] == false) {
       certificateInfo.commonName = new NSS.lib.buffer("Invalid Certificate");

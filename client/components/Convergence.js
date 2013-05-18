@@ -308,9 +308,19 @@ Convergence.prototype = {
       return proxy;
 
     if ((uri.scheme == "https") && (!this.isNotaryUri(uri)) && (!this.isWhitelisted(uri))) {
-      this.connectionManager.setProxyTunnel(proxy);
-
-      return this.localProxy.getProxyInfo();
+	  dump("Setting: namecoinOnly == " + this.namecoinOnly);
+	  
+      if(this.namecoinOnly && uri.host.substr(-4) != ".bit") // Don't verify non-Namecoin connections if only Namecoin verification is requested
+	  {
+	    dump("Not verifying non-Namecoin site...");
+	    return proxy;
+	  }
+	  else
+	  {
+	    this.connectionManager.setProxyTunnel(proxy);
+      
+        return this.localProxy.getProxyInfo();
+	  }
     } else {
       return proxy;
     }
