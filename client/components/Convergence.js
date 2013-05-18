@@ -284,8 +284,8 @@ Convergence.prototype = {
 
       for (var j in physicalNotaries) {
         if ((physicalNotaries[j].host == uri.host) && 
-            ((physicalNotaries[i].httpPort == uriPort) || 
-             (physicalNotaries[i].sslPort == uriPort)))
+            ((physicalNotaries[j].httpPort == uriPort) || 
+             (physicalNotaries[j].sslPort == uriPort)))
         {
           return true;
         }
