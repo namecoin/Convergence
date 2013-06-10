@@ -308,11 +308,11 @@ Convergence.prototype = {
       return proxy;
 
     if ((uri.scheme == "https") && (!this.isNotaryUri(uri)) && (!this.isWhitelisted(uri))) {
-	  dump("Setting: namecoinOnly == " + this.namecoinOnly);
+	  //dump("Setting: namecoinOnly == " + this.settingsManager.namecoinOnly);
 	  
-      if(this.namecoinOnly && uri.host.substr(-4) != ".bit") // Don't verify non-Namecoin connections if only Namecoin verification is requested
+      if(this.settingsManager.namecoinOnly && uri.host.substr(-4) != ".bit") // Don't verify non-Namecoin connections if only Namecoin verification is requested
 	  {
-	    dump("Not verifying non-Namecoin site...");
+	    dump("Not verifying non-Namecoin site...\n");
 	    return proxy;
 	  }
 	  else

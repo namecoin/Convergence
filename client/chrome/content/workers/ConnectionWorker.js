@@ -59,41 +59,102 @@ function sendClientResponse(localSocket, certificateManager, certificateInfo) {
   localSocket.negotiateSSL(certificateManager, certificateInfo);
 };
 
+function waitForInput2(fd, timeoutMillis) {
+  var pollfds_t        = ctypes.ArrayType(NSPR.types.PRPollDesc);
+  var pollfds          = new pollfds_t(1);
+  pollfds[0].fd        = fd;
+  pollfds[0].in_flags  = NSPR.lib.PR_POLL_READ | NSPR.lib.PR_POLL_EXCEPT | NSPR.lib.PR_POLL_ERR;
+  pollfds[0].out_flags = 0;
+
+  var status = NSPR.lib.PR_Poll(pollfds, 1, timeoutMillis);
+  
+  if (status == -1 || status == 0) {
+    return false;
+  }
+
+  return true;
+};
+
 // ToDo: finish this
 function getNamecoinFingerprint(host) {
-	var http = new XMLHttpRequest();
-	var url = "http://127.0.0.1:9000/";
-	
-	var hostSplit = host.split(".").reverse();
-	
-	var params = {jsonrpc: "1.0",method: "data", params: ["getValue", "d/"+(hostSplit[1])], id: "jsonrpc"};
-	
-	var domainData;
-	
-	http.open("POST", url, false);
-	
-	//Send the proper header information along with the request
-	http.setRequestHeader("Content-type", "text/x-json");
-	http.setRequestHeader("Content-length", params.length);
-	http.setRequestHeader("Connection", "close");
-	
-	http.send(JSON.stringify(params));
-	
-	if(http.status == 200) {
-		domainData = JSON.parse(http.responseText);
-		
-		if(domainData["fingerprint"]) {
-			dump("Found fingerprint in blockchain.");
-			return domainData["fingerprint"];
-		}
-		else {
-			dump("No fingerprint in blockchain!\n");
-			return null;
-		}
-	} else {
-		dump("NMControl error!\n")
-		return null;
-	}
+
+  // Mostly adapted from ConvergenceClientSocket.js
+
+  var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
+					       NSPR.lib.PR_AF_INET, 
+					       NSPR.lib.PR_AI_ADDRCONFIG);
+
+  if (addrInfo == null || addrInfo.isNull()) {
+    throw "DNS lookup failed: " + NSPR.lib.PR_GetError() + "\n";
+  }
+  
+  var netAddressBuffer = NSPR.lib.PR_Malloc(1024);
+  var netAddress       = ctypes.cast(netAddressBuffer, NSPR.types.PRNetAddr.ptr);
+
+  NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
+  NSPR.lib.PR_SetNetAddr(NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET, 
+			 9000, netAddress);
+  
+  var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
+
+  if (fd == null) {
+    throw "Unable to construct socket!\n";
+  }
+  
+  var status = NSPR.lib.PR_Connect(fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
+
+  if (status != 0) {
+    NSPR.lib.PR_Free(netAddressBuffer);
+    NSPR.lib.PR_FreeAddrInfo(addrInfo);
+    NSPR.lib.PR_Close(fd);
+    throw "Failed to connect to nmcontrol" + " -- " + NSPR.lib.PR_GetError();
+  }
+  
+  NSPR.lib.PR_Free(netAddressBuffer);
+  NSPR.lib.PR_FreeAddrInfo(addrInfo);
+  
+  var hostSplit = host.split(".").reverse();
+  
+  var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
+
+  NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
+  
+  var buffer = new NSPR.lib.buffer(4096);
+  var read;
+
+  while (((read = NSPR.lib.PR_Read(fd, buffer, 4095)) == -1) && 
+	 (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR))
+  {
+    dump("polling on read...\n");
+    if (!waitForInput2(fd, -1))
+      return null;
+  }
+
+  if (read <= 0) {
+    dump("Error read: " + read + " , " + NSPR.lib.PR_GetError() + "\n");
+    return null;
+  }
+
+  buffer[read] = 0;
+  var resultString = buffer.readString();
+  
+  dump("nmcontrol returned:\n" + resultString + "\n");
+  
+  var domainData = JSON.parse(resultString)["result"]["reply"];
+  
+  dump("domain data:\n" + domainData + "\n");
+  
+  domainData = JSON.parse(domainData);
+  
+  if(domainData["fingerprint"]) {
+    dump("Found fingerprint in blockchain.\n");
+    return domainData["fingerprint"];
+  }
+  else {
+    dump("No fingerprint in blockchain!\n");
+    return null;
+  }
+  
 }
 
 function checkCertificateValidity(certificateCache, activeNotaries, host, port, 
@@ -127,7 +188,10 @@ function checkCertificateValidity(certificateCache, activeNotaries, host, port,
 	if(Array.isArray(namecoinFingerprints) && namecoinFingerprints.indexOf(certificateInfo.sha1) != -1)
 	{
 		dump("Fingerprint matched blockchain.\n");
-		
+	
+		dump("Caching blockchain result: " + certificateInfo.sha1 + "\n");
+		certificateCache.cacheFingerprint(host, port, certificateInfo.sha1);
+	
 		// Fingerprint found
 		return {'status'      : true,
 			'target'      : target,
