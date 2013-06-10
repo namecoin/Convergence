@@ -401,8 +401,8 @@ SettingsManager.prototype.loadPreferences = function() {
   this.connectivityIsFailureEnabled = (rootElement.item(0).getAttribute("connectivity_failure") == "true");
   this.privateIpExempt              = (rootElement.item(0).getAttribute("private_ip_exempt") == "true");
   this.privatePkiExempt             = (rootElement.item(0).getAttribute("private_pki_exempt") == "true");
-  this.namecoinBlockchain           = (rootElement.item(0).getAttribute("namecoin_blockchain") == "false");
-  this.namecoinonly                 = (rootElement.item(0).getAttribute("namecoin_only") == "false");
+  this.namecoinBlockchain           = (rootElement.item(0).getAttribute("namecoin_blockchain") == "true");
+  this.namecoinOnly                 = (rootElement.item(0).getAttribute("namecoin_only") == "true");
   this.verificationThreshold        = rootElement.item(0).getAttribute("threshold");
   this.maxNotaryQuorum              = rootElement.item(0).getAttribute("max_notary_quorum");
   this.version                      = rootElement.item(0).getAttribute("version");
