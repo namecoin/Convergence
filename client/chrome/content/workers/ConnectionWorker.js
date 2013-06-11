@@ -16,46 +16,47 @@
 
 
 /**
- * This ChromeWorker is responsible for establishing an SSL connection
- * to the destination server, validating the target's SSL certificate
- * with the local cache or with the configured notaries, and then
- * establishing an SSL connection with the client.
- *
- * It then passes off the pair of established connections to its parent,
- * which hands them to the ShuffleWorker for all further shuffling.
- *
- * This is setup by the ConnectionManager in "components."
- *
- **/
+  * This ChromeWorker is responsible for establishing an SSL connection
+  * to the destination server, validating the target's SSL certificate
+  * with the local cache or with the configured notaries, and then
+  * establishing an SSL connection with the client.
+  *
+  * It then passes off the pair of established connections to its parent,
+  * which hands them to the ShuffleWorker for all further shuffling.
+  *
+  * This is setup by the ConnectionManager in 'components.'
+  *
+  **/
 
-importScripts("chrome://convergence/content/ctypes/NSPR.js",
-	      "chrome://convergence/content/ctypes/NSS.js",
-	      "chrome://convergence/content/ctypes/SSL.js",
-	      "chrome://convergence/content/ctypes/SQLITE.js",
-	      "chrome://convergence/content/ctypes/Serialization.js",
-	      "chrome://convergence/content/sockets/ConvergenceNotarySocket.js",
-	      "chrome://convergence/content/sockets/ConvergenceServerSocket.js",
-	      "chrome://convergence/content/sockets/ConvergenceClientSocket.js",	      
-	      "chrome://convergence/content/sockets/MultiDestinationConnector.js",	      
-	      "chrome://convergence/content/http/ConnectResponseParser.js",
-	      "chrome://convergence/content/http/HttpRequestBuilder.js",
-	      "chrome://convergence/content/http/HttpParser.js",
-	      "chrome://convergence/content/proxy/HttpProxyServer.js",
-	      "chrome://convergence/content/proxy/BaseProxyConnector.js",
-	      "chrome://convergence/content/proxy/HttpProxyConnector.js",
-	      "chrome://convergence/content/proxy/NotaryProxyConnector.js",
-	      "chrome://convergence/content/proxy/SOCKS5Connector.js",
-	      "chrome://convergence/content/proxy/ProxyConnector.js",
-	      "chrome://convergence/content/ssl/CertificateInfo.js",
-	      "chrome://convergence/content/ssl/Notary.js",
-	      "chrome://convergence/content/ssl/PhysicalNotary.js",
-	      "chrome://convergence/content/ssl/NativeCertificateCache.js",
-	      "chrome://convergence/content/ssl/ActiveNotaries.js",
-	      "chrome://convergence/content/ssl/CertificateManager.js",
-	      "chrome://convergence/content/ConvergenceResponseStatus.js");
+importScripts(
+  'chrome://convergence/content/ctypes/NSPR.js',
+  'chrome://convergence/content/ctypes/NSS.js',
+  'chrome://convergence/content/ctypes/SSL.js',
+  'chrome://convergence/content/ctypes/SQLITE.js',
+  'chrome://convergence/content/ctypes/Serialization.js',
+  'chrome://convergence/content/sockets/ConvergenceNotarySocket.js',
+  'chrome://convergence/content/sockets/ConvergenceServerSocket.js',
+  'chrome://convergence/content/sockets/ConvergenceClientSocket.js',
+  'chrome://convergence/content/sockets/MultiDestinationConnector.js',
+  'chrome://convergence/content/http/ConnectResponseParser.js',
+  'chrome://convergence/content/http/HttpRequestBuilder.js',
+  'chrome://convergence/content/http/HttpParser.js',
+  'chrome://convergence/content/proxy/HttpProxyServer.js',
+  'chrome://convergence/content/proxy/BaseProxyConnector.js',
+  'chrome://convergence/content/proxy/HttpProxyConnector.js',
+  'chrome://convergence/content/proxy/NotaryProxyConnector.js',
+  'chrome://convergence/content/proxy/SOCKS5Connector.js',
+  'chrome://convergence/content/proxy/ProxyConnector.js',
+  'chrome://convergence/content/ssl/CertificateInfo.js',
+  'chrome://convergence/content/ssl/Notary.js',
+  'chrome://convergence/content/ssl/PhysicalNotary.js',
+  'chrome://convergence/content/ssl/NativeCertificateCache.js',
+  'chrome://convergence/content/ssl/ActiveNotaries.js',
+  'chrome://convergence/content/ssl/CertificateManager.js',
+  'chrome://convergence/content/ConvergenceResponseStatus.js' );
 
 function sendClientResponse(localSocket, certificateManager, certificateInfo) {
-  localSocket.writeBytes(NSPR.lib.buffer("HTTP/1.0 200 Connection established\r\n\r\n"), 39);
+  localSocket.writeBytes(NSPR.lib.buffer('HTTP/1.0 200 Connection established\r\n\r\n'), 39);
   localSocket.negotiateSSL(certificateManager, certificateInfo);
 };
 
@@ -157,28 +158,33 @@ function getNamecoinFingerprint(host) {
   
 }
 
-function checkCertificateValidity(certificateCache, activeNotaries, host, port, 
-				  certificateInfo, privatePkiExempt, namecoinBlockchain) 
+function checkCertificateValidity(
+  certificateCache, activeNotaries, host, port, ip,
+  certificateInfo, privatePkiExempt)
 {
-  var target = host + ":" + port;
+  var target = host + ':' + port;
 
   if (privatePkiExempt && certificateInfo.isLocalPki) {
-    dump("Certificate is a local PKI cert.\n");
-    return {'status'      : true,
-	    'target'      : target,
-	    'certificate' : certificateInfo.original,
-	    'details'     : [{'notary' : 'Local PKI',
-	                      'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS}]};
+    dump('Certificate is a local PKI cert.\n');
+    return {
+      'status' : true,
+      'target' : target,
+      'certificate' : certificateInfo.original,
+      'details' : [{
+        'notary' : 'Local PKI',
+        'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS }] };
   }
 
-  dump("Checking certificate cache: " + certificateInfo.sha1 + "\n");
+  dump('Checking certificate cache: ' + certificateInfo.sha1 + '\n');
 
-  if (certificateCache.isCached(host, port, certificateInfo.sha1)) 
-    return {'status' : true, 
-	    'target' : target, 
-	    'certificate' : certificateInfo.original,
-	    'details' : [{'notary' : 'Certificate Cache', 
-		          'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS}]};
+  if (certificateCache.isCached(host, port, certificateInfo.sha1))
+    return {
+      'status' : true,
+      'target' : target,
+      'certificate' : certificateInfo.original,
+      'details' : [{
+        'notary' : 'Certificate Cache',
+        'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS }] };
 
   if(namecoinBlockchain && host.substr(-4) == ".bit") {
     dump("Checking Namecoin blockchain...\n");
@@ -211,20 +217,20 @@ function checkCertificateValidity(certificateCache, activeNotaries, host, port,
 	}
   }
 
-  dump("Not cached, checking notaries: " + certificateInfo.sha1 + "\n");
-  var results = activeNotaries.checkValidity(host, port, certificateInfo);
+  dump('Not cached, checking notaries: ' + certificateInfo.sha1 + '\n');
+  var results = activeNotaries.checkValidity(host, port, ip, certificateInfo);
 
   if (results['status'] == true) {
-    dump("Caching notary result: " + certificateInfo.sha1 + "\n");
+    dump('Caching notary result: ' + certificateInfo.sha1 + '\n');
     certificateCache.cacheFingerprint(host, port, certificateInfo.sha1);
     return results;
   } else {
     return results;
-  }  
+  }
 };
 
 onmessage = function(event) {
-  dump("ConnectionWorker got message...\n");
+  dump('ConnectionWorker got message...\n');
   var localSocket = null;
   var targetSocket = null;
 
@@ -235,42 +241,48 @@ onmessage = function(event) {
     SQLITE.initialize(event.data.sqliteFile);
 
     var certificateManager = new CertificateManager(event.data.certificates);
-    var activeNotaries     = new ActiveNotaries(event.data.settings, event.data.notaries);
-    localSocket            = new ConvergenceServerSocket(null, event.data.clientSocket);
-    var destination        = new HttpProxyServer(localSocket).getConnectDestination();
-    targetSocket           = new ConvergenceClientSocket(destination.host, 
-							 destination.port, 
-							 event.data.proxy);
-    var certificate        = targetSocket.negotiateSSL();
-    var certificateInfo    = new CertificateInfo(certificate);
-    var certificateCache   = new NativeCertificateCache(event.data.cacheFile, 
-							event.data.settings['cacheCertificatesEnabled']);
-    
-    dump("Checking validity...\n");
+    var activeNotaries = new ActiveNotaries(event.data.settings, event.data.notaries);
+    localSocket = new ConvergenceServerSocket(null, event.data.clientSocket);
+    var destination = new HttpProxyServer(localSocket).getConnectDestination();
+    targetSocket = new ConvergenceClientSocket(
+      destination.host, destination.port, event.data.proxy );
+    var certificate = targetSocket.negotiateSSL();
+    var certificateInfo = new CertificateInfo(certificate);
+    var certificateCache = new NativeCertificateCache(
+      event.data.cacheFile, event.data.settings['cacheCertificatesEnabled'] );
 
-    var results = this.checkCertificateValidity(certificateCache, activeNotaries,
-						destination.host, destination.port,
-						certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain']);
+    dump('Checking validity...\n');
+
+    var results = this.checkCertificateValidity(
+      certificateCache, activeNotaries,
+      destination.host, destination.port, targetSocket.ip,
+      certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain'] );
 
     if (results['status'] == false) {
-      certificateInfo.commonName = new NSS.lib.buffer("Invalid Certificate");
-      certificateInfo.altNames   = null;      
+      certificateInfo.commonName = new NSS.lib.buffer('Invalid Certificate');
+      certificateInfo.altNames = null;
+    } else {
+      // Such override allows totally invalid certificates to be used,
+      //  e.g. if CN and SubjectAltNames had nothing to do with the hostname/ip.
+      certificateInfo.commonName = new NSS.lib.buffer(destination.host);
+      certificateInfo.altNames = null;
     }
-    
+
     certificateInfo.encodeVerificationDetails(results);
 
     this.sendClientResponse(localSocket, certificateManager, certificateInfo);
 
-    postMessage({'clientFd' : Serialization.serializePointer(localSocket.fd), 
-    	         'serverFd' : Serialization.serializePointer(targetSocket.fd)});
+    postMessage({
+      'clientFd' : Serialization.serializePointer(localSocket.fd),
+      'serverFd' : Serialization.serializePointer(targetSocket.fd) });
 
     certificateCache.close();
 
-    dump("ConnectionWorker moving on!\n");
+    dump('ConnectionWorker moving on!\n');
   } catch (e) {
-    dump("ConnectionWorker exception : " + e + " , " + e.stack + "\n");
+    dump('ConnectionWorker exception : ' + e + ' , ' + e.stack + '\n');
     if (localSocket != null) localSocket.close();
     if (targetSocket != null) targetSocket.close();
-    dump("ConnectionWorker moving on from exception...\n");
+    dump('ConnectionWorker moving on from exception...\n');
   }
 };

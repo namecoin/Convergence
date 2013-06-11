@@ -2,10 +2,10 @@
 function ConvergenceNotarySocket(destinations, proxy) {
   if (typeof proxy == 'undefined' || proxy == null) {
     var multiConnector = new MultiDestinationConnector();
-    this.connection    = multiConnector.makeConnection(destinations);
+    this.connection = multiConnector.makeConnection(destinations);
   } else {
     var proxyConnector = new ProxyConnector(proxy);
-    this.connection    = proxyConnector.makeMultiConnection(destinations);
+    this.connection = proxyConnector.makeMultiConnection(destinations);
   }
 }
 
@@ -21,12 +21,12 @@ ConvergenceNotarySocket.prototype.writeBytes = function(buffer, length) {
   return this.connection.writeBytes(buffer, length);
 };
 
-ConvergenceNotarySocket.prototype.readString = function() {
-  return this.connection.readString();
+ConvergenceNotarySocket.prototype.readString = function(n) {
+  return this.connection.readString(n);
 };
 
-ConvergenceNotarySocket.prototype.readFully = function(length) {
-  return this.connection.readFully(length);
+ConvergenceNotarySocket.prototype.readFully = function(n) {
+  return this.connection.readFully(n);
 };
 
 ConvergenceNotarySocket.prototype.close = function() {

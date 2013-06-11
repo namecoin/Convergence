@@ -16,15 +16,15 @@
 
 
 /**
- * This class is responsible for parsing a normal HTTP response.
- * It is used, for instance, to parse the HTTP response a Notary
- * returns.
- *
- **/
+  * This class is responsible for parsing a normal HTTP response.
+  * It is used, for instance, to parse the HTTP response a Notary
+  * returns.
+  *
+  **/
 
 
 function HttpParser(socket) {
-  var response      = this.readFully(socket);
+  var response = this.readFully(socket);
   this.responseCode = this.parseResponseCode(response);
   this.responseBody = this.parseResponseBody(response);
 }
@@ -42,26 +42,26 @@ HttpParser.prototype.getResponseBodyJson = function() {
 };
 
 HttpParser.prototype.parseResponseBody = function(response) {
-  var headerDelimeter = response.indexOf("\r\n\r\n");
+  var headerDelimeter = response.indexOf('\r\n\r\n');
 
   if (headerDelimeter == -1) {
-    return "";
+    return '';
   }
 
   return response.substring(headerDelimeter+4);
 };
 
 HttpParser.prototype.parseResponseCode = function(response) {
-  var firstLineDelimiter = response.indexOf("\r\n");
+  var firstLineDelimiter = response.indexOf('\r\n');
 
   if (firstLineDelimiter == -1) {
     return 500;
   }
 
   var firstLine = response.substring(0, firstLineDelimiter);
-  var firstLineComponents = firstLine.split(" ");
+  var firstLineComponents = firstLine.split(' ');
 
-  if (firstLineComponents[0].indexOf("HTTP") != 0) {
+  if (firstLineComponents[0].indexOf('HTTP') != 0) {
     return 500;
   }
 
@@ -69,12 +69,22 @@ HttpParser.prototype.parseResponseCode = function(response) {
 };
 
 HttpParser.prototype.readFully = function(socket) {
-  var response = "";
-  var buf      = null;
+  var response = '', buff = null, n = null;
 
-  while ((buf = socket.readString()) != null) {
-    response += buf;
-    dump("Read: " + buf + "\n");
+  while ((buff = socket.readString(n)) != null) {
+    response += buff;
+
+    if (n != null) n -= buff.length;
+    else {
+      var headers_end = response.indexOf('\r\n\r\n');
+      if (headers_end != -1) {
+        var match = /\r\ncontent-length:\s+(\d+)\r\n/i
+          .exec(response.substring(0, headers_end+2));
+        if (match) {
+          n = (headers_end + 4 + parseInt(match[1])) - response.length;
+        }
+      }
+    }
   }
 
   return response;
