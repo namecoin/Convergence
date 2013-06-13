@@ -1,31 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<r:RDF xmlns:r="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+       xmlns="http://www.mozilla.org/2004/em-rdf#">
+<!-- Foo Widget Extension -->
+<r:Description r:about="urn:mozilla:extension:convergence@dot-bit.org">
+  <updates>
+    <r:Seq>
+      <r:li>
+        <r:Description>
+          <version>0.10</version>
+          <targetApplication>
+            <r:Description>
+              <!-- Thunderbird -->
+              <id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</id>
+              <minVersion>3.0</minVersion>
+              <maxVersion>99.*</maxVersion>
+              <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+              <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
+            </r:Description>
+          </targetApplication>
+          <targetApplication>
+            <r:Description>
+              <!-- Seamonkey -->
+              <id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</id>
+              <minVersion>2.0</minVersion>
+              <maxVersion>99.*</maxVersion>
+              <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+              <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
+            </r:Description>
+          </targetApplication>
+          <targetApplication>
+            <r:Description>
+              <!-- Firefox -->
+              <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+              <minVersion>3.5</minVersion>
+              <maxVersion>99.*</maxVersion>
+              <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+              <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
+            </r:Description>
+          </targetApplication>
+        </r:Description>
+      </r:li>
+    </r:Seq>
+  </updates>
+  <version>0.10</version>
+  <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+  <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
+  <signature>
+      MIIBEjALBgkqhkiG9w0BAQ0DggEBADmYWANGAmIt6O/wRvV3pydKa+S6svdY/ZBo
+      EJ8bcAAgJMDPiccdTiityR0y3hZ4vuBm6e3iOYgB/CknnCmqVEDK1J1yQoQ9E5M9
+      OFg/r5KLHVn1ht4Shk51/y809NvC7Ok/elq8SUdtMLiac9i8VIazVtEKC0YnxZjp
+      Ywpq1eW7B4sT01SiDQRhN7Vfum48Gu3Hr0KMRCVIecB0mKpoirFB4qqwCGjY2SFb
+      RZDHbtfE9VNv/tprbJ2pmauRWA0Ta5YPYeNvbwVUKW28ATG6ddkUEjk3xjfrrJza
+      kvJGL698sbJ7+Us3NHQwh7htvWPIL1srEphk2z5/8X1NnCK548o=
+  </signature>
+</r:Description>
+</r:RDF>
 
-<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-
-  <RDF:Description about="urn:mozilla:extension:convergence@extension.thoughtcrime.org">
-    <em:updates>
-      <RDF:Seq>
-
-        <RDF:li>
-          <RDF:Description>
-            <em:version>0.09</em:version>
-            <em:targetApplication>
-              <RDF:Description>
-                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-                <em:minVersion>4.0</em:minVersion>
-                <em:maxVersion>9.*</em:maxVersion>
-                <em:updateLink>http://convergence.io/releases/firefox/convergence-0.09.application=x-xpinstall</em:updateLink>
-                <em:updateHash>sha1:0edf5e64b794682f1f22ddba333e78890192b6e0</em:updateHash>
-              </RDF:Description>
-            </em:targetApplication>
-          </RDF:Description>
-        </RDF:li>
-
-      </RDF:Seq>
-    </em:updates>
-
-    <em:signature>MIGTMA0GCSqGSIb3DQEBDQUAA4GBAIeHT33Ig2fPqwBAwrWM/SswS/yemAIz+o7Jkq7KVoR2uR0HzpilPrVfZsqlFl1LgPhw0p8APmbZBk1FQ0QgasWsYv6wV9LlMWx2TxQCcJ67ctNME4yGZ3a04bVdpgcR+hPeuhGjAEDBzLn84Lv7cl/na468EouT5jUJft6hUBir</em:signature>
-
-  </RDF:Description>
-</RDF:RDF>

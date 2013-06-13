@@ -4,13 +4,21 @@
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
   <Description about="urn:mozilla:install-manifest">
-    <em:id>convergence@extension.thoughtcrime.org</em:id>
-    <em:version>0.09</em:version>
+    <em:id>convergence@dot-bit.org</em:id>
+    <em:version>0.10</em:version>
     <em:type>2</em:type>
     <em:optionsURL>chrome://convergence/content/options.xul</em:optionsURL>
     <em:unpack>true</em:unpack>
-    <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC4odEzbaXUBFGhDyQHNWZ2sWIdlsxqM+iPTsQlFzH6hGwT7MyqdNzRFPcsBp8aX89ToCB73AUW8ua64VdQf3mCSXzK5rZH+zIXTGpORr+nVEhpVsAzL2Nja1vvScMroVN9EonNNHyux//InXFW8oobMAyKg+BJgpaikdly8K8IKQIDAQAB</em:updateKey>
-    <em:updateURL>http://convergence.io/updates/update.text=rdf</em:updateURL>
+    <em:updateKey>
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApgcuN5S7acTs8ucMRNJm
+wDGZZcbmqSEw2nWQ8KBnYJcXjlC8JZR/NX0bdTP83xH1MSgiEiJWOkPu8gvNMzIO
+wFt3nB7V7MAOflm74+9AFj2RBrsLPhAauG3pOTjKdQw8SQkd2jBQW77xSQT/qXAh
+x3fdTAb1MCNOlD/gFLQU5Vuj/ZQqMArID00UMqUVOJWM6XP2WV6WzYpjQR2Ixvx4
+DDEXov/4O0AAtAilprTY6BKYGpSx2rw2VLReXw4pTLgQoMyo3IQyPb8qekJEMSn6
+B+AvIFeyywzGtlnfgPVZi2rKTC7rLzxucMfOgoTzl80ElNmLUCOqwU/QUFXHpxCU
++QIDAQAB
+    </em:updateKey>
+    <em:updateURL>http://dot-bit.org/files/Convergence.rdf</em:updateURL>
    
     <!-- Target Application this extension can install into, 
          with minimum and maximum supported versions. --> 
@@ -18,14 +26,14 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>4.0</em:minVersion>
-        <em:maxVersion>9.*</em:maxVersion>
+        <em:maxVersion>99.*</em:maxVersion>
       </Description>
     </em:targetApplication>
    
     <!-- Front End MetaData -->
-    <em:name>Convergence</em:name>
+    <em:name>Convergence for Namecoin</em:name>
     <em:description>A secure, agile, and distributed replacement for the Certificate Authority system.</em:description>
     <em:creator>Moxie Marlinspike</em:creator>
-    <em:homepageURL>http://convergence.io</em:homepageURL>
+    <em:homepageURL>http://dot-bit.org</em:homepageURL>
   </Description>      
 </RDF>
