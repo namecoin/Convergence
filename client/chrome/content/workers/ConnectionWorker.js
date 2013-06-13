@@ -148,6 +148,12 @@ function getNamecoinFingerprint(host) {
   
   if(domainData["fingerprint"]) {
     dump("Found fingerprint in blockchain.\n");
+    // transform all fingerprints to uppercase
+    if (domainData["fingerprint"] instanceof Array) {
+        domainData["fingerprint"] = domainData["fingerprint"].map(function (x) { return x.toUpperCase(); });
+    } else if (domainData["fingerprint"] instanceof String) {
+        domainData["fingerprint"] = domainData["fingerprint"].toUpperCase();
+    }
     return domainData["fingerprint"];
   }
   else {
