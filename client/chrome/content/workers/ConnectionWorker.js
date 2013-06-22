@@ -244,7 +244,104 @@ onmessage = function(event) {
     var activeNotaries     = new ActiveNotaries(event.data.settings, event.data.notaries);
     localSocket            = new ConvergenceServerSocket(null, event.data.clientSocket);
     var destination        = new HttpProxyServer(localSocket).getConnectDestination();
-    targetSocket           = new ConvergenceClientSocket(destination.host, 
+	
+	var resolvedHost = destination.host;
+	
+	// Check for .bit
+	if(destination.host.substr(-4) == ".bit") {
+	  dump("Resolving .bit HTTPS host " + destination.host + ":" + (destination.port) + "...\n");
+	    
+      // Mostly adapted from ConvergenceClientSocket.js
+      
+      var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
+					       NSPR.lib.PR_AF_INET, 
+					       NSPR.lib.PR_AI_ADDRCONFIG);
+      
+      if (addrInfo == null || addrInfo.isNull()) {
+        throw "DNS lookup failed: " + NSPR.lib.PR_GetError() + "\n";
+      }
+      
+      var netAddressBuffer = NSPR.lib.PR_Malloc(1024);
+      var netAddress       = ctypes.cast(netAddressBuffer, NSPR.types.PRNetAddr.ptr);
+      
+      NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
+      NSPR.lib.PR_SetNetAddr(NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET, 
+			 9000, netAddress);
+        
+      var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
+      
+      if (fd == null) {
+        throw "Unable to construct socket!\n";
+      }
+        
+      var status = NSPR.lib.PR_Connect(fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
+      
+      if (status != 0) {
+        NSPR.lib.PR_Free(netAddressBuffer);
+        NSPR.lib.PR_FreeAddrInfo(addrInfo);
+        NSPR.lib.PR_Close(fd);
+        throw "Failed to connect to nmcontrol" + " -- " + NSPR.lib.PR_GetError();
+      }
+        
+      NSPR.lib.PR_Free(netAddressBuffer);
+      NSPR.lib.PR_FreeAddrInfo(addrInfo);
+        
+      var hostSplit = destination.host.split(".").reverse();
+        
+      var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
+      
+      NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
+        
+      var buffer = new NSPR.lib.buffer(4096);
+      var read;
+      
+      while (((read = NSPR.lib.PR_Read(fd, buffer, 4095)) == -1) && 
+	    (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR))
+      {
+        dump("polling on read...\n");
+        if (!waitForInput2(fd, -1))
+          return null;
+      }
+      
+      if (read <= 0) {
+        dump("Error read: " + read + " , " + NSPR.lib.PR_GetError() + "\n");
+        return null;
+      }
+      
+      buffer[read] = 0;
+      var resultString = buffer.readString();
+        
+      dump("nmcontrol returned:\n" + resultString + "\n");
+        
+      var domainData = JSON.parse(resultString)["result"]["reply"];
+        
+      dump("domain data:\n" + domainData + "\n");
+        
+      domainData = JSON.parse(domainData);
+      		
+      var ipv4 = null;
+	  
+	  if (domainData["ip"])
+	  {
+	    if (domainData["ip"] instanceof Array) {
+	      ipv4 = domainData["ip"][0];
+	    }
+	    else
+	    {
+	      ipv4 = domainData["ip"];
+	    }
+	  }
+	  
+	  if(ipv4 != null)
+      {
+		dump("IPv4 record: " + ipv4 + "\n");
+		
+		resolvedHost = ipv4;
+      }
+	}
+	
+    //targetSocket           = new ConvergenceClientSocket(destination.host, 
+	targetSocket           = new ConvergenceClientSocket(resolvedHost, 
 							 destination.port, 
 							 event.data.proxy);
     var certificate        = targetSocket.negotiateSSL();
