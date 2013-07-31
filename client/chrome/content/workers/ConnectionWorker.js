@@ -75,7 +75,6 @@ function waitForInput2(fd, timeoutMillis) {
   return true;
 };
 
-// ToDo: finish this
 function getNamecoinFingerprint(host) {
 
   // Mostly adapted from ConvergenceClientSocket.js
@@ -113,9 +112,12 @@ function getNamecoinFingerprint(host) {
   NSPR.lib.PR_Free(netAddressBuffer);
   NSPR.lib.PR_FreeAddrInfo(addrInfo);
   
-  var hostSplit = host.split(".").reverse();
+  // Not needed with new nmcontrol
+  //var hostSplit = host.split(".").reverse();
   
-  var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
+  // Fixed for new nmcontrol
+  //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
+  var writeString = '{"params": ["getFingerprint", ' + host + '"], "method": "dns", "id": 1}'; 
 
   NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
   
@@ -146,15 +148,16 @@ function getNamecoinFingerprint(host) {
   
   domainData = JSON.parse(domainData);
   
-  if(domainData["fingerprint"]) {
+  // returns empty array when no fingerprint found
+  if(! (domainData instanceof Array && ! domainData[0] ) ) {
     dump("Found fingerprint in blockchain.\n");
     // transform all fingerprints to uppercase
-    if (domainData["fingerprint"] instanceof Array) {
-        domainData["fingerprint"] = domainData["fingerprint"].map(function (x) { return x.toUpperCase(); });
-    } else if (domainData["fingerprint"] instanceof String) {
-        domainData["fingerprint"] = domainData["fingerprint"].toUpperCase();
+    if (domainData instanceof Array) {
+        domainData = domainData.map(function (x) { return x.toUpperCase(); });
+    } else if (domainData instanceof String) {
+        domainData = domainData.toUpperCase();
     }
-    return domainData["fingerprint"];
+    return domainData;
   }
   else {
     dump("No fingerprint in blockchain!\n");
