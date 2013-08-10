@@ -26,8 +26,8 @@ Website Administrators should consult the .bit specification for information on 
 
 If you like Convergence for Namecoin and want to show your support, you can donate at the following addresses:
 
-Bitcoin: 19XajoDkrxKeDcXaCJVhBMeK83RSQ69HEV
-Namecoin: NCN4RnK2mKrLmYcLpNYvuLc1cZpTtiV7ZZ
+* Bitcoin: 19XajoDkrxKeDcXaCJVhBMeK83RSQ69HEV
+* Namecoin: NCN4RnK2mKrLmYcLpNYvuLc1cZpTtiV7ZZ
 
 ## Thanks to:
 
