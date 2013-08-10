@@ -117,7 +117,7 @@ function getNamecoinFingerprint(host) {
   
   // Fixed for new nmcontrol
   //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
-  var writeString = '{"params": ["getFingerprint", ' + host + '"], "method": "dns", "id": 1}'; 
+  var writeString = '{"params": ["getFingerprint", "' + host + '"], "method": "dns", "id": 1}'; 
 
   NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
   
@@ -260,6 +260,8 @@ onmessage = function(event) {
 					       NSPR.lib.PR_AF_INET, 
 					       NSPR.lib.PR_AI_ADDRCONFIG);
       
+      dump("addrInfo initialized\n");
+
       if (addrInfo == null || addrInfo.isNull()) {
         throw "DNS lookup failed: " + NSPR.lib.PR_GetError() + "\n";
       }
@@ -272,6 +274,8 @@ onmessage = function(event) {
 			 9000, netAddress);
         
       var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
+
+      dump("fd initialized\n");
       
       if (fd == null) {
         throw "Unable to construct socket!\n";
@@ -279,6 +283,8 @@ onmessage = function(event) {
         
       var status = NSPR.lib.PR_Connect(fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
       
+      dump("status initialized\n");
+
       if (status != 0) {
         NSPR.lib.PR_Free(netAddressBuffer);
         NSPR.lib.PR_FreeAddrInfo(addrInfo);
@@ -288,13 +294,22 @@ onmessage = function(event) {
         
       NSPR.lib.PR_Free(netAddressBuffer);
       NSPR.lib.PR_FreeAddrInfo(addrInfo);
-        
-      var hostSplit = destination.host.split(".").reverse();
-        
-      var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
       
+      dump("PR_Free called\n");
+
+      // Not needed with new nmcontrol  
+      //var hostSplit = destination.host.split(".").reverse();
+      
+      // Fixed for new nmcontrol
+      //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
+      var writeString = '{"params": ["getIp4", "' + destination.host + '"], "method": "dns", "id": 1}'; 
+      
+      dump("writeString initialized\n");
+
       NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
         
+      dump("PR_Write called\n");
+
       var buffer = new NSPR.lib.buffer(4096);
       var read;
       
@@ -306,6 +321,8 @@ onmessage = function(event) {
           return null;
       }
       
+      dump("PR_Read finished\n");
+
       if (read <= 0) {
         dump("Error read: " + read + " , " + NSPR.lib.PR_GetError() + "\n");
         return null;
@@ -324,15 +341,10 @@ onmessage = function(event) {
       		
       var ipv4 = null;
 	  
-	  if (domainData["ip"])
+          // returns empty array when no IP found
+	  if (domainData instanceof Array && domainData[0])
 	  {
-	    if (domainData["ip"] instanceof Array) {
-	      ipv4 = domainData["ip"][0];
-	    }
-	    else
-	    {
-	      ipv4 = domainData["ip"];
-	    }
+	    ipv4 = domainData[0]; // ToDo: round-robin balancing
 	  }
 	  
 	  if(ipv4 != null)
