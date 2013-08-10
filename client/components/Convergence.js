@@ -324,6 +324,12 @@ Convergence.prototype = {
     } else {
       // Not HTTPS
 	  
+        // If proxy settings exist, refuse to leak data.
+        if(proxy && proxy.type) {
+                  dump("Proxy type: " + proxy.type + "; avoiding proxy leak.\n");
+          return proxy;
+        }
+
 	  // Check for .bit
 	if(uri.host.substr(-4) == ".bit") {
 	  dump("Resolving .bit HTTP host " + uri.host + ":" + (uri.port) + "...\n");
