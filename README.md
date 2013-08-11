@@ -19,7 +19,7 @@ Website Administrators should consult the .bit specification for information on 
 
 ## Known Bugs
 
-1. HTTP (non-TLS) websites cannot be viewed while using a proxy.
+1. HTTP (non-TLS) .bit websites cannot be viewed while using a proxy.
 2. Some .bit websites don't load; this is because nmcontrol doesn't yet support the entire .bit specification.  (Placing bounties might improve this situation.)
 
 ## Donate
