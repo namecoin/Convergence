@@ -359,6 +359,9 @@ onmessage = function(event) {
 	targetSocket           = new ConvergenceClientSocket(resolvedHost, 
 							 destination.port, 
 							 event.data.proxy);
+
+    if(! destination.passThroughHeaders) {
+
     var certificate        = targetSocket.negotiateSSL();
     var certificateInfo    = new CertificateInfo(certificate);
     var certificateCache   = new NativeCertificateCache(event.data.cacheFile, 
@@ -383,6 +386,14 @@ onmessage = function(event) {
     	         'serverFd' : Serialization.serializePointer(targetSocket.fd)});
 
     certificateCache.close();
+
+    }
+    else {
+      targetSocket.writeBytes(NSPR.lib.buffer(destination.passThroughHeaders), destination.passThroughHeaders.length);
+
+      postMessage({'clientFd' : Serialization.serializePointer(localSocket.fd), 
+    	           'serverFd' : Serialization.serializePointer(targetSocket.fd)});
+    }
 
     dump("ConnectionWorker moving on!\n");
   } catch (e) {

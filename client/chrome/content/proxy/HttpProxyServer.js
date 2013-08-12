@@ -48,22 +48,56 @@ HttpProxyServer.prototype.readHttpHeaders = function() {
 };
 
 HttpProxyServer.prototype.parseDestination = function(httpHeaders) {
-  if (httpHeaders.indexOf("CONNECT ") != 0) {
-    throw "Not a connect request!";
+  if (httpHeaders.indexOf("CONNECT ") == 0) {
+    
+    dump("Parsing CONNECT request...\n");
+
+    var destination = httpHeaders.substring(8, httpHeaders.indexOf(" ", 9));
+    var splitIndex  = destination.indexOf(":");
+    
+    if (splitIndex == -1) {
+      throw "Not a well formatted CONNECT destination: " + destination;
+    }
+    
+    var endpoint  = new Object();
+    endpoint.host = destination.substring(0, splitIndex);
+    endpoint.port = parseInt(destination.substring(splitIndex+1));
+    
+    return endpoint;
+    
+  }
+  else if(httpHeaders.indexOf("GET ") == 0) {
+    
+    dump("Parsing GET request...\n");
+
+    var hostLine = httpHeaders.indexOf("Host: ");
+
+    var destination = httpHeaders.substring(hostLine+6, httpHeaders.indexOf("\r\n", hostLine+6));
+    var splitIndex  = destination.indexOf(":");
+
+    var endpoint  = new Object();
+
+    if (splitIndex == -1) {
+      endpoint.host = destination;
+      endpoint.port = 80;
+    }
+    else
+    {
+      endpoint.host = destination.substring(0, splitIndex);
+      endpoint.port = parseInt(destination.substring(splitIndex+1));
+    }
+
+    dump("GET host:port = " + endpoint.host + ":" + endpoint.port + "\n");
+
+    endpoint.passThroughHeaders = httpHeaders;
+    
+    return endpoint;
+    
   }
 
-  var destination = httpHeaders.substring(8, httpHeaders.indexOf(" ", 9));
-  var splitIndex  = destination.indexOf(":");
-
-  if (splitIndex == -1) {
-    throw "Not a well formatted destination: " + destination;
+  else {
+    throw "Not a get or connect request!";
   }
-
-  var endpoint  = new Object();
-  endpoint.host = destination.substring(0, splitIndex);
-  endpoint.port = parseInt(destination.substring(splitIndex+1));
-
-  return endpoint;
 };
 
 HttpProxyServer.prototype.getConnectDestination = function() {
