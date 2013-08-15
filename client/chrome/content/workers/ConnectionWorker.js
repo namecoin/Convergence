@@ -351,10 +351,12 @@ onmessage = function(event) {
       var ipv4 = null;
 	  
           // returns empty array when no IP found
-	  if (domainData instanceof Array && domainData[0])
-	  {
+	  if (domainData instanceof Array && domainData[0]) {
 	    ipv4 = domainData[0]; // ToDo: round-robin balancing
 	  }
+          else {
+            ipv4 = "0.0.0.0"
+          }
 	  
 	  if(ipv4 != null)
       {
