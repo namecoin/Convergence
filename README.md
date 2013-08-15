@@ -10,7 +10,31 @@ See README in `server` section for details on running notary and `client` for
 browser extension.
 
 
-### Fork
+### Note on compatibility
+
+As changes to both client (addon) and server (notary) in this fork are quite
+extensive at this point, old notaries (pre-fork) might not work with client from
+here.
+
+Due to things like e.g. SNI usage in client it WILL see different certificate
+than non-SNI-using (pre-fork) notary.
+
+Some protocol changes like passing IP address client picked to notary while
+shouldn't (I think) cause old notaries to return http-400, are not (and were
+not) tested with them and may also cause whatever behavior.
+
+In short - just set up your own notaries using code in this fork.
+
+Also, I don't use "bounce notaries", as all notaries I use are private anyway
+and there aren't any useable public ones (due to compatibility things outlined
+above), so that feature might be broken.
+
+I suggest disabling it with your own notaries, as it serves no purpose in that
+case (nothing to anonymize with just one user), while opening notaries to be
+used as public to-port-4242-only proxies.
+
+
+### Changes from upstream
 
  - client
 
@@ -26,6 +50,8 @@ browser extension.
        (816c74e).
        Upstream [PR #174](https://github.com/moxie0/Convergence/pull/174).
 
+     - Fix for breakage due to private browsing changes in firefox-20 (ffb7c7b).
+
    - Bumped plugin version, max ff version is 50.* and automatic upstream
      updates are disabled.
 
@@ -35,7 +61,10 @@ browser extension.
    - Bugfix in nsIWebBrowserPersist.saveURI call (b5dbb50), preventing adding
      notaries from URL (at least in newer ff).
 
-   - Fix for breakage due to private browsing changes in firefox-20 (ffb7c7b).
+   - Use SNI TLS extension for client connections. This is kinda major flaw in
+     the original extension, as it's quite widespread yet original Convergence
+     only saw "generic" certificate for IP both on client and server (see also
+     corresponding notary fix).
 
    - Added "Exceptions" tab to options for hostname patterns that convergence
      should not touch.
@@ -64,6 +93,13 @@ browser extension.
      are irrelevant to the client (and always being overidden) - only
      fingerprint and notary responses matter.
 
+   - Handle too long (for cert subject line) hostnames by generating wildcard
+     certificates (776728d).
+
+   - More organized, prefixed and disableable (per-source, if necessary)
+     logging. Can be enabled by setting "convergence.logging.enabled" to "true"
+     in about:config or by changing "print_all: null" to "true" in Logger.js.
+
    - TODO: Cache fingerprnts for (hostname, port, ip) tuples, not just
      (hostname, port), because of cdn's and round-robin-dns mirrors -
      server-side as well, though there can be several signatures for one
@@ -83,11 +119,6 @@ browser extension.
 
    - TODO: Check how other stuff like "https everywhere" gets the certs, maybe
      swap socks proxy mitm for some warning or connection-killer hook.
-
-   - TODO: SNI in server or client doesn't seem to be working, test: blogs.atlassian.com
-
-   - TODO: better configurable logging instead of just `dump()`, with at least
-     ability to disable it.
 
  - server
 

@@ -34,9 +34,8 @@ function ConvergenceClientSocket(host, port, proxy, fd) {
     NSPR.lib.PR_AF_INET,
     NSPR.lib.PR_AI_ADDRCONFIG );
 
-  if (addrInfo == null || addrInfo.isNull()) {
+  if (addrInfo == null || addrInfo.isNull())
     throw 'DNS lookup failed: ' + NSPR.lib.PR_GetError() + '\n';
-  }
 
   var netAddressBuffer = NSPR.lib.PR_Malloc(1024);
   var netAddress = ctypes.cast(netAddressBuffer, NSPR.types.PRNetAddr.ptr);
@@ -49,9 +48,7 @@ function ConvergenceClientSocket(host, port, proxy, fd) {
   this.ip = NSPR.lib.inet_ntoa(netAddress.contents.ip).readString();
   this.fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
 
-  if (this.fd == null) {
-    throw 'Unable to construct socket!\n';
-  }
+  if (this.fd == null) throw 'Unable to construct socket!\n';
 
   var status = NSPR.lib.PR_Connect(this.fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
 
@@ -59,11 +56,13 @@ function ConvergenceClientSocket(host, port, proxy, fd) {
     NSPR.lib.PR_Free(netAddressBuffer);
     NSPR.lib.PR_FreeAddrInfo(addrInfo);
     NSPR.lib.PR_Close(this.fd);
-    throw 'Failed to connect to ' + host + ' : ' + port + ' -- ' + NSPR.lib.PR_GetError();
+    var err_code = NSPR.lib.PR_GetError(),
+      err_text = NSPR.lib.PR_ErrorToName(err_code).readString();
+    throw 'Failed to connect to ' + host + ' : ' + port + ' -- (' + err_code + ') ' + err_text;
   }
 
   if (proxy != null) {
-    dump('Making proxied connection...\n');
+    CV9BLog.proto('Making proxied connection...');
     var proxyConnector = new ProxyConnector(proxy);
     proxyConnector.makeConnection(this, host, port);
   }
@@ -80,46 +79,43 @@ function allGoodAuth(arg, fd, foo, bar) {
 }
 
 function clientAuth(arg, fd, caNames, retCert, retKey) {
-  dump('Server requested client certificate...\n');
+  CV9BLog.proto('Server requested client certificate...');
   var status = SSL.lib.NSS_GetClientAuthData(arg, fd, caNames, retCert, retKey);
-  dump('Client certificate status: ' + staus + '\n');
+  CV9BLog.proto('Client certificate status: ' + staus);
 }
 
 ConvergenceClientSocket.prototype.negotiateSSL = function() {
+  var status;
+
   this.fd = SSL.lib.SSL_ImportFD(null, this.fd);
   var callbackFunction = SSL.types.SSL_AuthCertificate(allGoodAuth);
-  var status = SSL.lib.SSL_AuthCertificateHook(this.fd, callbackFunction, null);
+  status = SSL.lib.SSL_AuthCertificateHook(this.fd, callbackFunction, null);
+  if (status == -1) throw 'Error setting auth certificate hook!';
 
-  if (status == -1) {
-    throw 'Error setting auth certificate hook!';
+  if (this.host) { // undefined for e.g. notary connections
+    status = SSL.lib.SSL_SetURL(this.fd, this.host);
+    if (status == -1) throw 'Error setting SNI hostname';
   }
 
   // var callbackFunction = SSL.types.SSLGetClientAuthData(clientAuth);
   // var status = SSL.lib.SSL_GetClientAuthDataHook(this.fd, callbackFunction, null);
+  // if (status == -1) throw 'Error setting client auth certificate hook!';
 
-  // if (status == -1) {
-  //   throw 'Error setting client auth certificate hook!';
-  // }
-
-  var status = SSL.lib.SSL_ResetHandshake(this.fd, NSPR.lib.PR_FALSE);
-
-  if (status == -1) {
-    throw 'Error resetting handshake!';
-  }
-
-  var status;
+  status = SSL.lib.SSL_ResetHandshake(this.fd, NSPR.lib.PR_FALSE);
+  if (status == -1) throw 'Error resetting handshake!';
 
   while (
       ((status = SSL.lib.SSL_ForceHandshakeWithTimeout(
         this.fd, NSPR.lib.PR_SecondsToInterval(10) )) == -1)
       && (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR) ) {
-    dump('Polling on handshake...\n');
-    if (!this.waitForInput(10000))
-      throw 'SSL handshake failed!';
+    CV9BLog.proto('Polling on handshake...');
+    if (!this.waitForInput(10000)) throw 'SSL handshake failed (timeout)';
   }
-
   if (status == -1) {
-    throw 'SSL handshake failed!';
+    // Not sure if these are correct/meaningful errors here
+    var err_code = NSPR.lib.PR_GetError(),
+      err_text = NSPR.lib.PR_ErrorToName(err_code).readString();
+    throw 'SSL handshake failed: (' + err_code + ') ' + err_text;
   }
 
   return SSL.lib.SSL_PeerCertificate(this.fd);
@@ -141,12 +137,12 @@ ConvergenceClientSocket.prototype.readString = function(n) {
 
   while (((read = NSPR.lib.PR_Read(this.fd, buffer, n)) == -1) &&
       (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR)) {
-    dump('polling on read...\n');
+    CV9BLog.proto('polling on read...');
     if (!this.waitForInput(8000)) return null; // TODO: hardcoded fail-timeout
   }
 
   if (read <= 0) {
-    dump('Error read: ' + read + ' , ' + NSPR.lib.PR_GetError() + '\n');
+    CV9BLog.proto('Error read: ' + read + ' , ' + NSPR.lib.PR_GetError());
     return null;
   }
 

@@ -33,10 +33,10 @@ NSPR.initialize = function(nsprPath) {
     sharedLib = ctypes.open(nsprPath);
   } catch (e) {
     try {
-      dump('Failed to find nspr4 in installed directory, checking system paths.\n');
+      CV9BLog.core('Failed to find nspr4 in installed directory, checking system paths.');
       sharedLib = ctypes.open(ctypes.libraryName('nspr4'));
     } catch (e) {
-      dump('Failed to find nspr4 in system paths, trying explicit FreeBSD path.\n');
+      CV9BLog.core('Failed to find nspr4 in system paths, trying explicit FreeBSD path.');
       sharedLib = ctypes.open('/usr/local/lib/libnspr4.so');
     }
   }
@@ -182,10 +182,6 @@ NSPR.initialize = function(nsprPath) {
                                               // PRTimeParameters,
                                               // PRExplodedTime.ptr),
 
-    PR_GetError : sharedLib.declare('PR_GetError',
-                                    ctypes.default_abi,
-                                    ctypes.int),
-
     PR_GetConnectStatus : sharedLib.declare('PR_GetConnectStatus',
                                             ctypes.default_abi,
                                             ctypes.int,
@@ -222,6 +218,11 @@ NSPR.initialize = function(nsprPath) {
     PR_GetError : sharedLib.declare('PR_GetError',
                                     ctypes.default_abi,
                                     ctypes.int),
+
+    PR_ErrorToName : sharedLib.declare('PR_ErrorToName',
+                                    ctypes.default_abi,
+                                    ctypes.char.ptr,
+                                    ctypes.int ),
 
     PR_NewLock : sharedLib.declare('PR_NewLock',
                               ctypes.default_abi,

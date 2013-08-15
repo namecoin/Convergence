@@ -29,6 +29,7 @@
   **/
 
 importScripts(
+  'chrome://convergence/content/Logger.js',
   'chrome://convergence/content/ctypes/NSPR.js',
   'chrome://convergence/content/ctypes/NSS.js',
   'chrome://convergence/content/ctypes/SSL.js',
@@ -165,7 +166,7 @@ function checkCertificateValidity(
   var target = host + ':' + port;
 
   if (privatePkiExempt && certificateInfo.isLocalPki) {
-    dump('Certificate is a local PKI cert.\n');
+    CV9BLog.worker_conn('Certificate is a local PKI cert.');
     return {
       'status' : true,
       'target' : target,
@@ -175,7 +176,7 @@ function checkCertificateValidity(
         'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS }] };
   }
 
-  dump('Checking certificate cache: ' + certificateInfo.sha1 + '\n');
+  CV9BLog.worker_conn('Checking certificate cache: ' + certificateInfo.sha1);
 
   if (certificateCache.isCached(host, port, certificateInfo.sha1))
     return {
@@ -217,11 +218,11 @@ function checkCertificateValidity(
 	}
   }
 
-  dump('Not cached, checking notaries: ' + certificateInfo.sha1 + '\n');
+  CV9BLog.worker_conn('Not cached, checking notaries: ' + certificateInfo.sha1);
   var results = activeNotaries.checkValidity(host, port, ip, certificateInfo);
 
-  if (results['status'] == true) {
-    dump('Caching notary result: ' + certificateInfo.sha1 + '\n');
+  if (results['status'] === true) {
+    CV9BLog.worker_conn('Caching notary result: ' + certificateInfo.sha1);
     certificateCache.cacheFingerprint(host, port, certificateInfo.sha1);
     return results;
   } else {
@@ -230,11 +231,13 @@ function checkCertificateValidity(
 };
 
 onmessage = function(event) {
-  dump('ConnectionWorker got message...\n');
   var localSocket = null;
   var targetSocket = null;
 
   try {
+    if (typeof event.data.logging === 'boolean') CV9BLog.print_all = event.data.logging;
+    CV9BLog.worker_conn('Got message...');
+
     NSPR.initialize(event.data.nsprFile);
     NSS.initialize(event.data.nssFile);
     SSL.initialize(event.data.sslFile);
@@ -251,38 +254,32 @@ onmessage = function(event) {
     var certificateCache = new NativeCertificateCache(
       event.data.cacheFile, event.data.settings['cacheCertificatesEnabled'] );
 
-    dump('Checking validity...\n');
+    CV9BLog.worker_conn('Checking validity...');
 
     var results = this.checkCertificateValidity(
       certificateCache, activeNotaries,
       destination.host, destination.port, targetSocket.ip,
       certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain'] );
+    CV9BLog.worker_conn('Validity check results:', results);
 
-    if (results['status'] == false) {
-      certificateInfo.commonName = new NSS.lib.buffer('Invalid Certificate');
-      certificateInfo.altNames = null;
-    } else {
-      // Such override allows totally invalid certificates to be used,
-      //  e.g. if CN and SubjectAltNames had nothing to do with the hostname/ip.
-      certificateInfo.commonName = new NSS.lib.buffer(destination.host);
-      certificateInfo.altNames = null;
-    }
+    // Such override allows totally invalid certificates to be used,
+    //  e.g. if CN and SubjectAltNames had nothing to do with the hostname/ip.
+    certificateInfo.commonName = new NSS.lib.buffer(
+      results['status'] === true ? destination.host : 'Invalid Certificate' );
+    certificateInfo.altNames = null;
 
     certificateInfo.encodeVerificationDetails(results);
-
     this.sendClientResponse(localSocket, certificateManager, certificateInfo);
-
     postMessage({
       'clientFd' : Serialization.serializePointer(localSocket.fd),
       'serverFd' : Serialization.serializePointer(targetSocket.fd) });
-
     certificateCache.close();
 
-    dump('ConnectionWorker moving on!\n');
+    CV9BLog.worker_conn('done');
   } catch (e) {
-    dump('ConnectionWorker exception : ' + e + ' , ' + e.stack + '\n');
+    CV9BLog.worker_conn('exception - ' + e + ', ' + e.stack);
     if (localSocket != null) localSocket.close();
     if (targetSocket != null) targetSocket.close();
-    dump('ConnectionWorker moving on from exception...\n');
+    CV9BLog.worker_conn('moving on from exception...');
   }
 };

@@ -31,19 +31,12 @@ function HttpProxyServer(clientSocket) {
 
 HttpProxyServer.prototype.readHttpHeaders = function() {
   var headers = '';
-
   for (;;) {
     var buf = this.clientSocket.readString();
-
     if (buf == null)
       throw 'Socket closed while reading local HTTP CONNECT request.';
-
     headers  += buf;
-
-    dump('Total headers: ' + headers + '\n');
-
-    if (headers.indexOf('\r\n\r\n') != -1)
-      return headers;
+    if (headers.indexOf('\r\n\r\n') != -1) return headers;
   }
 };
 
@@ -67,9 +60,9 @@ HttpProxyServer.prototype.parseDestination = function(httpHeaders) {
 };
 
 HttpProxyServer.prototype.getConnectDestination = function() {
-  dump('Reading http headers...\n');
+  CV9BLog.worker('Reading http headers...');
   httpHeaders = this.readHttpHeaders();
 
-  dump('Read http headers: ' + httpHeaders + '\n');
+  CV9BLog.worker('Read http headers: ' + httpHeaders);
   return this.parseDestination(httpHeaders);
 };

@@ -23,13 +23,13 @@ Components.utils.import('resource://gre/modules/ctypes.jsm');
   **/
 
 function CertificateStatus(convergenceManager) {
-  dump('CertificateStatus constructor called : ' + convergenceManager.nssFile.path + '\n');
+  CV9BLog.ui('CertificateStatus constructor called : ' + convergenceManager.nssFile.path);
   NSS.initialize(convergenceManager.nssFile.path);
-  dump('Constructed!\n');
+  CV9BLog.ui('Constructed!');
 }
 
 CertificateStatus.prototype.getInvalidCertificate = function(destination) {
-  dump('Getting invalid certificate for: ' + destination + '\n');
+  CV9BLog.ui('Getting invalid certificate for: ' + destination);
 
   var badCertService = null;
   // FF <= 19
@@ -74,7 +74,8 @@ CertificateStatus.prototype.getCertificateForCurrentTab = function() {
   if (browser.currentURI.scheme != 'https')
     return null;
 
-  var securityProvider = browser.securityUI.QueryInterface(Components.interfaces.nsISSLStatusProvider);
+  var securityProvider = browser.securityUI
+    .QueryInterface(Components.interfaces.nsISSLStatusProvider);
 
   if (securityProvider.SSLStatus != null) {
     return securityProvider.SSLStatus.serverCert;
@@ -116,11 +117,13 @@ CertificateStatus.prototype.getVerificationStatus = function(certificate) {
 };
 
 CertificateStatus.prototype.getCurrentTabStatus = function() {
-  dump('Getting current tab status...\n');
+  CV9BLog.ui('Getting current tab status...');
   var certificate = this.getCertificateForCurrentTab();
 
   if (certificate != null) {
-    return this.getVerificationStatus(certificate);
+    var status = this.getVerificationStatus(certificate)
+    CV9BLog.ui('Tab cert verification status:', status);
+    return status;
   }
 
   return null;

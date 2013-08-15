@@ -29,6 +29,7 @@
   **/
 
 importScripts(
+  'chrome://convergence/content/Logger.js',
   'chrome://convergence/content/ctypes/NSPR.js',
   'chrome://convergence/content/ctypes/NSS.js',
   'chrome://convergence/content/ctypes/SSL.js',
@@ -71,6 +72,7 @@ ShuffleWorker.prototype.initializeDescriptors = function() {
 };
 
 ShuffleWorker.prototype.initialize = function(data) {
+  if (typeof data.logging === 'boolean') CV9BLog.print_all = data.logging;
   NSPR.initialize(data.nsprFile);
   NSS.initialize(data.nssFile);
   SSL.initialize(data.sslFile);
@@ -95,17 +97,15 @@ ShuffleWorker.prototype.handleConnectionEvents = function(pollfds, connectionsLe
   var modified = false;
 
   for (var i=connectionsLength-2;i>=0;i-=2) {
-    var result = this.connectionPairs[i/2].shuffle(pollfds[i].out_flags,
-                                                    pollfds[i+1].out_flags);
+    var result = this.connectionPairs[i/2]
+      .shuffle(pollfds[i].out_flags, pollfds[i+1].out_flags);
 
     if (result[0]) { // Closed
       this.connectionPairs[i/2].close();
       this.connectionPairs.splice(i/2, 1);
     }
 
-    if (result[0] || result[1]) {
-      modified = true;
-    }
+    if (result[0] || result[1]) modified = true;
   }
 
   return modified;
@@ -138,12 +138,12 @@ ShuffleWorker.prototype.processConnections = function() {
     var modified = false;
 
     if (this.isWakeupEvent(pollfds[connectionsLength].out_flags)) {
-      dump('Bailing out for wakeup...\n');
+      CV9BLog.worker_shuffle('Bailing out for wakeup...');
       return;
     }
 
     if (this.isAcceptEvent(pollfds[connectionsLength + 1].out_flags)) {
-      dump('Handling accept event...\n');
+      CV9BLog.worker_shuffle('Handling accept event...');
       this.handleAcceptEvent();
     }
 
@@ -161,18 +161,18 @@ onmessage = function(event) {
   try {
     switch (event.data.type) {
     case TYPE_INITIALIZE:
-      dump('Initializing ShuffleWorker...\n');
+      CV9BLog.worker_shuffle('Initializing...');
       shuffleWorker.initialize(event.data);
       break;
     case TYPE_CONNECTION:
-      dump('Adding ShuffleWorker connection...\n');
+      CV9BLog.worker_shuffle('Adding connection...');
       shuffleWorker.addConnection(event.data);
       break;
     }
 
     shuffleWorker.processConnections();
-    dump('ShuffleWorker complete!\n');
+    CV9BLog.worker_shuffle('done');
   } catch (e) {
-    dump('ShuffleWorker exception: ' + e + ' , ' + e.stack + '\n');
+    CV9BLog.worker_shuffle('exception: ' + e + ' , ' + e.stack);
   }
 };
