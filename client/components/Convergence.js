@@ -307,8 +307,17 @@ Convergence.prototype = {
     if (!this.enabled)
       return proxy;
 
-    if (uri.scheme == 'https' && !this.isNotaryUri(uri) && !this.isWhitelisted(uri)) {
-      if(this.settingsManager.namecoinOnly && uri.host.substr(-4) != ".bit") // Don't verify non-Namecoin connections if only Namecoin verification is requested
+    // Namecoin always goes through the proxy
+    if(uri.host.substr(-4) == ".bit") {
+      this.connectionManager.setProxyTunnel(proxy);
+      
+      return this.localProxy.getProxyInfo();
+    }
+
+    if ((uri.scheme == "https") && (!this.isNotaryUri(uri)) && (!this.isWhitelisted(uri))) {
+	  //dump("Setting: namecoinOnly == " + this.settingsManager.namecoinOnly);
+	  
+      if(this.settingsManager.namecoinOnly) // Don't verify non-Namecoin connections if only Namecoin verification is requested
 	  {
 	    dump("Not verifying non-Namecoin site...\n");
 	    return proxy;
@@ -317,9 +326,10 @@ Convergence.prototype = {
 	  {
 	    this.connectionManager.setProxyTunnel(proxy);
       
-        return this.localProxy.getProxyInfo();
+            return this.localProxy.getProxyInfo();
 	  }
     } else {
+      // Not HTTPS and not Namecoin
       return proxy;
     }
   },

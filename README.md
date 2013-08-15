@@ -1,168 +1,38 @@
-Convergence
---------------------
+# Convergence for Namecoin
 
-This is a fork of Moxie Marlinspike's Convergence tool: http://convergence.io/
+Convergence for Namecoin is a modification to Moxie Marlinspike's tool Convergence, modified to implement the Namecoin .bit specification.  It can resolve .bit domains to IPv4 addresses, and verify .bit TLS certficates via the Namecoin blockchain.  This allows safe usage of self-signed certificates, without trusting any third party.  IP address mappings and TLS fingerprints are stored in the Namecoin blockchain; see the .bit specification for more details.
 
-Good high-level overview of the tool can be found in Moxie's "SSL And The Future
-Of Authenticity" talk at BlackHat USA 2011: http://www.youtube.com/watch?v=Z7Wl2FW2TcA
+Convergence for Namecoin is a product of Viral Electron Chaos Laboratories (VECLabs).
 
-See README in `server` section for details on running notary and `client` for
-browser extension.
+## End-User Installation
 
+1. Install namecoind and nmcontrol as per their documentation, and ensure that they are both running.
+2. Install the XPI into Firefox.
+3. Restart Firefox when prompted.
+4. There will be a Convergence icon in the toolbar.  Click its dropdown menu and choose Options.
+5. On the Advanced tab, make sure that "Verify Namecoin (.bit) domains" and "Only verify Namecoin (.bit) domains" are both checked.
+6. Click OK.
+7. Click the Convergence icon to turn it green.
+8. That's it!  You can safely browse .bit websites without relying on third-party DNS, and .bit HTTPS websites will automatically have their certificates verified.
 
-### Note on compatibility
+Website Administrators should consult the .bit specification for information on how to embed TLS fingerprints in the Namecoin blockchain.  An example configuration is at "d/namecoin-tls-test-3".
 
-As changes to both client (addon) and server (notary) in this fork are quite
-extensive at this point, old notaries (pre-fork) might not work with client from
-here.
+## Known Bugs
 
-Due to things like e.g. SNI usage in client it WILL see different certificate
-than non-SNI-using (pre-fork) notary.
+1. Some .bit websites don't load; this is because nmcontrol doesn't yet support the entire .bit specification.  (Placing bounties might improve this situation.)
 
-Some protocol changes like passing IP address client picked to notary while
-shouldn't (I think) cause old notaries to return http-400, are not (and were
-not) tested with them and may also cause whatever behavior.
+## Donate
 
-In short - just set up your own notaries using code in this fork.
+If you like Convergence for Namecoin and want to show your support, you can donate at the following addresses:
 
-Also, I don't use "bounce notaries", as all notaries I use are private anyway
-and there aren't any useable public ones (due to compatibility things outlined
-above), so that feature might be broken.
+* Bitcoin: 19XajoDkrxKeDcXaCJVhBMeK83RSQ69HEV
+* Namecoin: NCN4RnK2mKrLmYcLpNYvuLc1cZpTtiV7ZZ
 
-I suggest disabling it with your own notaries, as it serves no purpose in that
-case (nothing to anonymize with just one user), while opening notaries to be
-used as public to-port-4242-only proxies.
+## Thanks to:
 
-
-### Changes from upstream
-
- - client
-
-   - Should work with newer firefox versions.
-
-     - Merged fix from upstream [PR #170](https://github.com/moxie0/Convergence/pull/170).
-
-     - Fixed major issue with extension hanging forever polling on connection to
-       notary after receiving http response (bbdc538).
-       Upstream [PR #173](https://github.com/moxie0/Convergence/pull/173).
-
-     - Minor issue with displaying cached fingerprint timestamps as NaN-NaN-NaN
-       (816c74e).
-       Upstream [PR #174](https://github.com/moxie0/Convergence/pull/174).
-
-     - Fix for breakage due to private browsing changes in firefox-20 (ffb7c7b).
-
-   - Bumped plugin version, max ff version is 50.* and automatic upstream
-     updates are disabled.
-
-   - Backends' "isNotaryUri" check seem to have typo bugs (c96d242), messing up
-     results (silently with >1 notaries).
-
-   - Bugfix in nsIWebBrowserPersist.saveURI call (b5dbb50), preventing adding
-     notaries from URL (at least in newer ff).
-
-   - Use SNI TLS extension for client connections. This is kinda major flaw in
-     the original extension, as it's quite widespread yet original Convergence
-     only saw "generic" certificate for IP both on client and server (see also
-     corresponding notary fix).
-
-   - Added "Exceptions" tab to options for hostname patterns that convergence
-     should not touch.
-
-     Useful for local networks and dynamic hostnames (e.g. "vm-X.mydomain.tld")
-     that never validate with available notaries for some reason, where adding
-     individual exceptions can be problematic.
-
-     Default value is previously hardcoded list of exceptions - localhost and
-     mozilla "aus3" addons-update host.
-
-   - Supress unhandled non-critical JS errors here and there, mostly to keep JS
-     console clean.
-
-   - Send IP along with hostname (for e.g. SNI and cert validation) and port,
-     because same name can be resolved to different hosts in case of CDNs or
-     round-robin-dns mirrors, which can have unrelated certificates.
-
-   - "Priority" checkbox in options dialog to always query marked notaries first
-     (if their count is more than "subset to query" - subset is picked at
-     random among these).
-     Idea is to have some subset of notaries to *always* query, picking others
-     at random from the rest.
-
-   - Certificates for invalid names now can be validated - CN or SubjectAltNames
-     are irrelevant to the client (and always being overidden) - only
-     fingerprint and notary responses matter.
-
-   - Handle too long (for cert subject line) hostnames by generating wildcard
-     certificates (776728d).
-
-   - More organized, prefixed and disableable (per-source, if necessary)
-     logging. Can be enabled by setting "convergence.logging.enabled" to "true"
-     in about:config or by changing "print_all: null" to "true" in Logger.js.
-
-   - TODO: Cache fingerprnts for (hostname, port, ip) tuples, not just
-     (hostname, port), because of cdn's and round-robin-dns mirrors -
-     server-side as well, though there can be several signatures for one
-     hostname there.
-
-   - TODO: Certificates for IPs don't seem to be checked via notaries at all, so
-     don't have "verificationDetails" comment and never validate with
-     convergence.
-
-   - TODO: "Allowed as bounce notary" checkbox in notaries' list to block local
-     notaries from acting as such, for instance.
-
-   - TODO: Make hardcoded check timeouts configurable.
-
-       So that plugin won't hang on bogus notaries any longer than necessary
-       with a specific connection latency in mind.
-
-   - TODO: Check how other stuff like "https everywhere" gets the certs, maybe
-     swap socks proxy mitm for some warning or connection-killer hook.
-
- - server
-
-   - Has simplier (implementation/maintenance-wise) argparse-based CLI.
-
-   - Renders basic info about the node on GET requests from e.g. browsers (based
-     on upstream [PR #120](https://github.com/moxie0/Convergence/pull/120)).
-
-   - Does not implement any
-     [daemonization](http://0pointer.de/public/systemd-man/daemon.html) - can be
-     done either naively from shell, with os-specific "start-stop-daemon" in
-     init-scripts or proper init like upstart or systemd.
-
-   - Allows more stuff to be configurable.
-
-   - Verifier backends can be installed as a "convergence.verifier" entry points.
-
-   - "perspective" verifier has "verify_ca" option (disabled by default) to also
-     perform OpenSSL verification of the server certificate chain, allowing to
-     combine network perspectives with an old-style CA-list verification (and
-     whatever other backends).
-
-   - Enable TLS SNI in "perspective" verifier during handshake, so that host can
-     return appropriate cert for a hostname.
-
-         It is done in a hackish way at the very first
-         Context.set_info_callback() callback invocation.
-
-         For a more proper way see [twisted #5374](http://twistedmatrix.com/trac/ticket/5374)
-         (still unresolved at the moment of writing).
-
-   - Can be configured from YAML file, including python logging module configuration.
-
-   - Pass IP address to verifiers along with hostname, if provided (see
-     corresponding send feature in client for rationale).
-
-   - Batch same-target requests arriving at the same time (lot of static content
-     from subdomain, for instance), returning same response to all of them,
-     instead of running a separate check (and e.g. connection) for each one of
-     them.
-
-   - "bind" option for perspective verifier to use for special routing -
-     e.g. through some tunnel or tor/i2p network.
-
-   - TODO: Add option to serve bundle for browsers at some URL.
-
-   - TODO: Statistics on queries.
+* Moxie Marlinspike for Convergence.
+* phelix and the Namecoin Marketing and Development Fund for supporting the project bounty.
+* itsnotlupus for adding TLS to the .bit spec.
+* khal for nmcontrol.
+* khal and vinced for namecoind.
+* Anyone else I forgot.

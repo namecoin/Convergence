@@ -18,7 +18,6 @@ build: clean
 	zip -qr $(ZIP_NAME) ./components
 	zip -qr $(ZIP_NAME) ./style
 	zip -qr $(ZIP_NAME) ./install.rdf
-	zip -qr $(ZIP_NAME) ./update.rdf
 	zip -qr $(ZIP_NAME) ./icon.png
 	zip -qr $(ZIP_NAME) ./icon64.png
 	mv $(ZIP_NAME) $(XPI_NAME)
