@@ -112,7 +112,7 @@ SettingsManager.prototype.getMaxNotaryQuorum = function() {
 
 SettingsManager.prototype.setMaxNotaryQuorum = function(val) {
   this.maxNotaryQuorum = val;
-}
+};
 
 SettingsManager.prototype.setCacheCertificates = function(val) {
   this.cacheCertificatesEnabled = val;
@@ -184,8 +184,8 @@ SettingsManager.prototype.getSerializedSettings = function() {
     'maxNotaryQuorum'              : this.maxNotaryQuorum,
     'privatePkiExempt'             : this.privatePkiExempt,
 	'namecoinBlockchain'           : this.namecoinBlockchain,
-	'namecoinOnly'                 : this.namecoinOnly
-    'whitelistPatterns'            : this.whitelistPatterns.source,
+	'namecoinOnly'                 : this.namecoinOnly,
+    'whitelistPatterns'            : this.whitelistPatterns.source
   };
 };
 

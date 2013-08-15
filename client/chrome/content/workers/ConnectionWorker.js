@@ -170,7 +170,7 @@ function getNamecoinFingerprint(host) {
 
 function checkCertificateValidity(
   certificateCache, activeNotaries, host, port, ip,
-  certificateInfo, privatePkiExempt)
+  certificateInfo, privatePkiExempt, namecoinBlockchain)
 {
   var target = host + ':' + port;
 
@@ -389,7 +389,6 @@ onmessage = function(event) {
     certificateInfo.commonName = new NSS.lib.buffer(
       results['status'] === true ? destination.host : 'Invalid Certificate' );
     certificateInfo.altNames = null;    
-    }
     
     certificateInfo.encodeVerificationDetails(results);
 
