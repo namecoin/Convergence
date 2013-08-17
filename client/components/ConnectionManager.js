@@ -108,12 +108,43 @@ ConnectionManager.prototype.spawnConnection = function(clientSocket) {
 
   var connectionManager = this;
   worker.onmessage = function(event) {
+
+    if(event.data.namecoinError) {
+
+    var nmcError = "Namecoin Resolution Error: " + event.data.namecoinError;
+
+    dump(nmcError + "\n");
+
+    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                   .getService(Components.interfaces.nsIWindowMediator);
+    var mainWindow = wm.getMostRecentWindow("navigator:browser");
+
+    mainWindow.setTimeout( function() {
+    
+      var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                   .getService(Components.interfaces.nsIWindowMediator);
+      var mainWindow = wm.getMostRecentWindow("navigator:browser");
+
+      mainWindow.gBrowser.getNotificationBox().appendNotification(nmcError, 'convergence-resolution-error',
+                            'chrome://global/skin/icons/warning-16.png',
+                            mainWindow.gBrowser.getNotificationBox().PRIORITY_WARNING_MEDIUM, []);
+
+    }, 1000);
+
+    dump("Notification pending in 1 second\n");
+    
+    }
+    else
+    {
+
     connectionManager.shuffleWorker.postMessage({
       'type' : TYPE_CONNECTION,
       'client' : event.data.clientFd,
       'server' : event.data.serverFd});
 
     NSPR.lib.PR_Write(connectionManager.wakeupWrite, connectionManager.buffer, 5);
+
+    }
   };
 
   var self = this;

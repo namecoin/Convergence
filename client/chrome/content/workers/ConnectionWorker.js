@@ -262,7 +262,9 @@ onmessage = function(event) {
 	// Check for .bit
 	if(destination.host.substr(-4) == ".bit") {
 	  dump("Resolving .bit HTTPS host " + destination.host + ":" + (destination.port) + "...\n");
-	    
+	
+      try {
+    
       // Mostly adapted from ConvergenceClientSocket.js
       
       var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
@@ -355,7 +357,8 @@ onmessage = function(event) {
 	    ipv4 = domainData[0]; // ToDo: round-robin balancing
 	  }
           else {
-            ipv4 = "0.0.0.0"
+            //ipv4 = "0.0.0.0"
+            throw "No IPv4 address was found for the requested domain " + destination.host;
           }
 	  
 	  if(ipv4 != null)
@@ -364,6 +367,19 @@ onmessage = function(event) {
 		
 		resolvedHost = ipv4;
       }
+
+        } catch(e) {
+
+            // .bit DNS resolution error
+
+            localSocket.close();
+
+            postMessage({'namecoinError' : e});
+
+            return;
+
+        }
+
 	}
 	
     //targetSocket           = new ConvergenceClientSocket(destination.host, 
