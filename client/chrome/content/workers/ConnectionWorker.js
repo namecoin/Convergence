@@ -261,7 +261,7 @@ onmessage = function(event) {
 	
 	// Check for .bit
 	if(destination.host.substr(-4) == ".bit") {
-	  dump("Resolving .bit HTTPS host " + destination.host + ":" + (destination.port) + "...\n");
+	  dump("Resolving .bit host " + destination.host + ":" + (destination.port) + "...\n");
 	
       try {
     
