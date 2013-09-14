@@ -354,6 +354,12 @@ onmessage = function(event) {
 	  
           // returns empty array when no IP found
 	  if (domainData instanceof Array && domainData[0]) {
+
+            // nmcontrol returns the string "ns" when its security policy blocked an external DNS lookup
+            if(domainData[0] == "ns") {
+              throw "The requested domain " + destination.host + " would bypass the Namecoin blockchain";
+            }
+            
 	    ipv4 = domainData[0]; // ToDo: round-robin balancing
 	  }
           else {
