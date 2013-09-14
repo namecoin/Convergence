@@ -6,7 +6,7 @@ Convergence for Namecoin is a product of Viral Electron Chaos Laboratories (VECL
 
 ## End-User Installation
 
-1. Install namecoind and nmcontrol as per their documentation, and ensure that they are both running.
+1. Install namecoind and nmcontrol as per their documentation, and ensure that they are both running.  For best results, use the nmcontrol at https://github.com/uVAdN2vUw2aMENSu19cY7ic24Gvp7Fd/nmcontrol until khalahan merges those changes.
 2. Install the XPI into Firefox.
 3. Restart Firefox when prompted.
 4. There will be a Convergence icon in the toolbar.  Click its dropdown menu and choose Options.
@@ -19,7 +19,7 @@ Website Administrators should consult the .bit specification for information on 
 
 ## Known Bugs
 
-1. Some .bit websites don't load; this is because nmcontrol doesn't yet support the entire .bit specification.  (Placing bounties might improve this situation.)
+1. In extremely rare cases, some .bit websites might not load; this is because nmcontrol doesn't yet support the entire .bit specification.  (Placing bounties might improve this situation.)  However, almost all major .bit websites should now be supported if using the nmcontrol linked above.
 
 ## Donate
 
