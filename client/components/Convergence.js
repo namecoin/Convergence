@@ -319,7 +319,7 @@ Convergence.prototype = {
 	  
       if(this.settingsManager.namecoinOnly) // Don't verify non-Namecoin connections if only Namecoin verification is requested
 	  {
-	    dump("Not verifying non-Namecoin site...\n");
+	    dump("Not verifying non-Namecoin site '" + uri.host + "'...\n");
 	    return proxy;
 	  }
 	  else

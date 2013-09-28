@@ -387,6 +387,11 @@ onmessage = function(event) {
         }
 
 	}
+	else {
+	  dump("ConnectionWorker non-Namecoin host '" + destination.host + "'\n");
+	}
+	
+	dump("ConnectionWorker connecting client socket to " + resolvedHost + ":" + destination.port + "\n");
 	
     //targetSocket           = new ConvergenceClientSocket(destination.host, 
 	targetSocket           = new ConvergenceClientSocket(resolvedHost, 

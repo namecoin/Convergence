@@ -82,6 +82,10 @@ HttpProxyServer.prototype.parseDestination = function(httpHeaders) {
 
     dump("GET host:port = " + endpoint.host + ":" + endpoint.port + "\n");
 
+    httpHeaders = httpHeaders.replace("GET http://" + destination + "/", "GET /");
+
+    dump("Headers with hidden proxy: " + httpHeaders + "\n");
+
     endpoint.passThroughHeaders = httpHeaders;
     
     return endpoint;
