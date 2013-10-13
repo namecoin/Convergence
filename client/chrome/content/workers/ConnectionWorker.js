@@ -77,6 +77,18 @@ function waitForInput2(fd, timeoutMillis) {
   return true;
 };
 
+/* Sanitise certificate fingerprint for string comparison.  This transforms
+   everything to upper case and removes all colons.  */
+function sanitiseFingerprint (fpr)
+{
+  var withoutColons = fpr.replace (/:/g, "");
+  var res = withoutColons.toUpperCase ();
+
+  dump ("Sanitised fingerprint: " + fpr + " -> " + res + "\n");
+
+  return res;
+}
+
 function getNamecoinFingerprint(host) {
 
   // Mostly adapted from ConvergenceClientSocket.js
@@ -153,11 +165,11 @@ function getNamecoinFingerprint(host) {
   // returns empty array when no fingerprint found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
     dump("Found fingerprint in blockchain.\n");
-    // transform all fingerprints to uppercase
+    // transform all fingerprints to uppercase and remove colons
     if (domainData instanceof Array) {
-        domainData = domainData.map(function (x) { return x.toUpperCase(); });
+        domainData = domainData.map(sanitiseFingerprint);
     } else if (domainData instanceof String) {
-        domainData = domainData.toUpperCase();
+        domainData = sanitiseFingerprint (domainData);
     }
     return domainData;
   }
@@ -199,9 +211,11 @@ function checkCertificateValidity(
   if(namecoinBlockchain && host.substr(-4) == ".bit") {
     dump("Checking Namecoin blockchain...\n");
 	
-	var namecoinFingerprints = getNamecoinFingerprint(host);
+	var namecoinFingerprints = getNamecoinFingerprint (host);
+        var wantedFingerprint = sanitiseFingerprint (certificateInfo.sha1);
 	
-	if(Array.isArray(namecoinFingerprints) && namecoinFingerprints.indexOf(certificateInfo.sha1) != -1)
+	if (namecoinFingerprints instanceof Array
+            && namecoinFingerprints.indexOf (wantedFingerprint) !== -1)
 	{
 		dump("Fingerprint matched blockchain.\n");
 	
