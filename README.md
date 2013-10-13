@@ -15,7 +15,9 @@ Convergence for Namecoin is a product of Viral Electron Chaos Laboratories (VECL
 7. Click the Convergence icon to turn it green.
 8. That's it!  You can safely browse .bit websites without relying on third-party DNS, and .bit HTTPS websites will automatically have their certificates verified.
 
-Website Administrators should consult the .bit specification for information on how to embed TLS fingerprints in the Namecoin blockchain.  An example configuration is at "d/namecoin-tls-test-3".
+## Website Administrators
+
+Website Administrators should place the SHA-1 fingerprint of their website in the "fingerprint" field of their Namecoin domain.  Note that the newer "tls" field is not yet supported.  The fingerprint may either include or omit colons.  Convergence is not aware of SNI (this is a good thing for privacy reasons); the "fingerprint" field should contain the fingerprint of the certificate presented to browsers when the IP address is typed into the browser.  (The "Common Name" of the certificate does not need to match the domain; only the fingerprint is checked.)  To debug websites which generate a "Convergence Certificate Verification Failure", you can click "View Details" in the yellow bar that appears on the top of the page, and then click "View"; Convergence will show you the certificate it received from the server.  Consult the .bit specification for more information on how to embed TLS fingerprints in the Namecoin blockchain.  An example configuration is at "d/namecoin-tls-test-3".
 
 ## Known Bugs
 
