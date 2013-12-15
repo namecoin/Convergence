@@ -87,11 +87,11 @@ function sanitiseFingerprint (fpr)
   dump ("Sanitised fingerprint: " + fpr + " -> " + res + "\n");
 
   return res;
-}
+};
 
-function getNamecoinFingerprint(host) {
-
-  // Mostly adapted from ConvergenceClientSocket.js
+function getNamecoinDnsField(host, method) {
+  
+    // Mostly adapted from ConvergenceClientSocket.js
 
   var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
 					       NSPR.lib.PR_AF_INET, 
@@ -131,7 +131,7 @@ function getNamecoinFingerprint(host) {
   
   // Fixed for new nmcontrol
   //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
-  var writeString = '{"params": ["getFingerprint", "' + host + '"], "method": "dns", "id": 1}'; 
+  var writeString = '{"params": ["' + method + '", "' + host + '"], "method": "dns", "id": 1}'; 
 
   NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
   
@@ -161,6 +161,29 @@ function getNamecoinFingerprint(host) {
   dump("domain data:\n" + domainData + "\n");
   
   domainData = JSON.parse(domainData);
+
+  return domainData;
+};
+
+function getNamecoinIp4(host) {
+
+  var domainData = getNamecoinDnsField(host, "getIp4");
+
+  // returns empty array when no IP found
+  if(! (domainData instanceof Array && ! domainData[0] ) ) {
+    dump("Found IPv4 address in blockchain.\n");
+    return domainData;
+  }
+  else {
+    dump("No IPv4 address in blockchain!\n");
+    return null;
+  }
+  
+};
+
+function getNamecoinFingerprint(host) {
+
+  var domainData = getNamecoinDnsField(host, "getFingerprint");
   
   // returns empty array when no fingerprint found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -178,7 +201,7 @@ function getNamecoinFingerprint(host) {
     return null;
   }
   
-}
+};
 
 function checkCertificateValidity(
   certificateCache, activeNotaries, host, port, ip,
@@ -279,90 +302,7 @@ onmessage = function(event) {
 	
       try {
     
-      // Mostly adapted from ConvergenceClientSocket.js
-      
-      var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
-					       NSPR.lib.PR_AF_INET, 
-					       NSPR.lib.PR_AI_ADDRCONFIG);
-      
-      dump("addrInfo initialized\n");
-
-      if (addrInfo == null || addrInfo.isNull()) {
-        throw "DNS lookup failed: " + NSPR.lib.PR_GetError() + "\n";
-      }
-      
-      var netAddressBuffer = NSPR.lib.PR_Malloc(1024);
-      var netAddress       = ctypes.cast(netAddressBuffer, NSPR.types.PRNetAddr.ptr);
-      
-      NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
-      NSPR.lib.PR_SetNetAddr(NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET, 
-			 9000, netAddress);
-        
-      var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
-
-      dump("fd initialized\n");
-      
-      if (fd == null) {
-        throw "Unable to construct socket!\n";
-      }
-        
-      var status = NSPR.lib.PR_Connect(fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
-      
-      dump("status initialized\n");
-
-      if (status != 0) {
-        NSPR.lib.PR_Free(netAddressBuffer);
-        NSPR.lib.PR_FreeAddrInfo(addrInfo);
-        NSPR.lib.PR_Close(fd);
-        throw "Failed to connect to nmcontrol" + " -- " + NSPR.lib.PR_GetError();
-      }
-        
-      NSPR.lib.PR_Free(netAddressBuffer);
-      NSPR.lib.PR_FreeAddrInfo(addrInfo);
-      
-      dump("PR_Free called\n");
-
-      // Not needed with new nmcontrol  
-      //var hostSplit = destination.host.split(".").reverse();
-      
-      // Fixed for new nmcontrol
-      //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
-      var writeString = '{"params": ["getIp4", "' + destination.host + '"], "method": "dns", "id": 1}'; 
-      
-      dump("writeString initialized\n");
-
-      NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
-        
-      dump("PR_Write called\n");
-
-      var buffer = new NSPR.lib.buffer(4096);
-      var read;
-      
-      while (((read = NSPR.lib.PR_Read(fd, buffer, 4095)) == -1) && 
-	    (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR))
-      {
-        dump("polling on read...\n");
-        if (!waitForInput2(fd, -1))
-          return null;
-      }
-      
-      dump("PR_Read finished\n");
-
-      if (read <= 0) {
-        dump("Error read: " + read + " , " + NSPR.lib.PR_GetError() + "\n");
-        return null;
-      }
-      
-      buffer[read] = 0;
-      var resultString = buffer.readString();
-        
-      dump("nmcontrol returned:\n" + resultString + "\n");
-        
-      var domainData = JSON.parse(resultString)["result"]["reply"];
-        
-      dump("domain data:\n" + domainData + "\n");
-        
-      domainData = JSON.parse(domainData);
+      var domainData = getNamecoinIp4(destination.host);
       		
       var ipv4 = null;
 	  
