@@ -183,6 +183,8 @@ function updateAdvancedSettings() {
   if(all_resolvers.indexOf("Tor") == -1) document.getElementById('priority-list').appendItem(priorityLabels["Tor"], "Tor");
   if(all_resolvers.indexOf("I2p") == -1) document.getElementById('priority-list').appendItem(priorityLabels["I2p"], "I2p");
   
+  updateAnonWarning();
+  
 };
 
 function updateCacheSettings(sortColumn, sortDirection) {
@@ -423,6 +425,30 @@ function sortCacheTree(column) {
   column.setAttribute('sortDirection', sortDirection);
 }
 
+function updateAnonWarning() {
+  
+  var priorities = document.getElementById('priority-list');
+  var itemValue;
+  
+  for(var index=0; index < priorities.getRowCount(); index++) {
+  
+    itemValue = priorities.getItemAtIndex(index).value;
+  
+    if(itemValue == "Tor" || itemValue == "I2p") {
+      document.getElementById("anon-warning").classList.add("active-warning");
+      return;
+    }
+    
+    if(itemValue == "DontUse") {
+      document.getElementById("anon-warning").classList.remove("active-warning");
+      return;
+    }
+  }
+  
+  var torIndex = document.getElementById('priority-list').currentIndex;
+  
+}
+
 function priorityIncrease() {
   
   var index = document.getElementById('priority-list').currentIndex;
@@ -434,6 +460,8 @@ function priorityIncrease() {
   //alert("" + label + "," + value);
   
   document.getElementById('priority-list').selectItem(document.getElementById('priority-list').insertItemAt( (index-1 >= 0 ? index-1 : 0), label, value));
+  
+  updateAnonWarning();
   
 }
 
@@ -448,4 +476,6 @@ function priorityDecrease() {
   //alert("" + label + "," + value);
   
   document.getElementById('priority-list').selectItem(document.getElementById('priority-list').insertItemAt(index+1, label, value));
+  
+  updateAnonWarning();
 }

@@ -16,3 +16,11 @@ tree {min-height: 50px;}
 #down-button {
   list-style-image: url("chrome://convergence/content/images/down.gif");
 }
+
+#anon-warning {
+  border: red solid 3px; padding: 3px;
+}
+
+#anon-warning:not(.active-warning) {
+  display: none;
+}
