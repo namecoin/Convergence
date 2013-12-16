@@ -394,7 +394,7 @@ onmessage = function(event) {
 	var resolvedHost = destination.host;
 	
 	// Check for .bit
-	if(destination.host.substr(-4) == ".bit") {
+	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit") {
 	  dump("Resolving .bit host " + destination.host + ":" + (destination.port) + "...\n");
 	
       try {
@@ -426,7 +426,7 @@ onmessage = function(event) {
 	
 	var new_proxy = event.data.proxy;
 	
-	if(destination.host.substr(-4) == ".bit" && resolvedHost.substr(-6) == ".onion") {
+	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit" && resolvedHost.substr(-6) == ".onion") {
 	  
           new_proxy = {
             'host' : "localhost",

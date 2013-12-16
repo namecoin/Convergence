@@ -308,7 +308,7 @@ Convergence.prototype = {
       return proxy;
 
     // Namecoin always goes through the proxy
-    if(uri.host.substr(-4) == ".bit") {
+    if(this.settingsManager.namecoinResolve && uri.host.substr(-4) == ".bit") {
       this.connectionManager.setProxyTunnel(proxy);
       
       return this.localProxy.getProxyInfo();
