@@ -32,7 +32,14 @@ SOCKS5Connector.prototype.sendClientHello = function(proxySocket) {
 };
 
 SOCKS5Connector.prototype.readServerHello = function(proxySocket) {
-  var serverHello = proxySocket.readFully(2);
+  //var serverHello = proxySocket.readFully(2); // biolizard89 hack
+  var serverHello = proxySocket.readBuffer(2);
+
+  // biolizard89 test
+  if (serverHello[0] != 0x05) {
+    proxySocket.close();
+    throw 'Not SOCKSv5';
+  }
 
   if (serverHello[1] == 0xFF) {
     proxySocket.close();
@@ -54,7 +61,8 @@ SOCKS5Connector.prototype.sendConnectRequest = function(proxySocket, host, port)
 };
 
 SOCKS5Connector.prototype.readConnectResponse = function(proxySocket, host) {
-  var response = proxySocket.readFully(4);
+  //var response = proxySocket.readFully(4);
+  var response = proxySocket.readBuffer(4);
 
   CV9BLog.worker('Got response: ' + response[1]);
 
@@ -64,13 +72,13 @@ SOCKS5Connector.prototype.readConnectResponse = function(proxySocket, host) {
   }
 
   if (response[3] == 0x01) {
-    proxySocket.readFully(6);
+    proxySocket.readBuffer(6);
   } else if (response[3] == 0x04) {
-    proxySocket.readFully(18);
+    proxySocket.readBuffer(18);
   } else if (response[3] == 0x03) {
-    var domainLength = proxySocket.readFully(1);
+    var domainLength = proxySocket.readBuffer(1);
     domainLength = ctypes.cast(domainLength[0], ctypes.int32_t);
-    proxySocket.readFully(domainLength+2);
+    proxySocket.readBuffer(domainLength+2);
   } else {
     proxySocket.close();
     throw 'Unknown address type in socks connect response.';

@@ -12,12 +12,47 @@
 
 <tabbox flex="1">
 	<tabs>
+		<tab label="Namecoin"/>
 		<tab label="Notaries"/>
 		<tab label="Advanced"/>
 		<tab label="Cache Manager"/>
 		<tab label="Exceptions"/>
 	</tabs>
 	<tabpanels flex="1">
+		
+		<tabpanel id="namecoinTab" flex="1">
+				
+			<vbox flex="1">
+				
+				<checkbox id="namecoin-resolve" label="Resolve Namecoin (.bit) DNS against the blockchain (requires namecoind and nmcontrol)." />
+				<checkbox id="namecoin-blockchain" label="Verify Namecoin (.bit) TLS against the blockchain (requires namecoind and nmcontrol)." />
+				<checkbox id="namecoin-only" label="Only verify Namecoin (.bit) domains (other domains will revert to CA verification)." />
+				
+				<separator />
+				
+				<description>Choose the priority for which resolution methods should be used for Namecoin (.bit) domains.</description>
+				
+				<hbox flex="1">	
+					<listbox flex="1" id="priority-list">
+						<!-- This was moved to Javascript -->
+						<!--
+						<listitem id="priority-ip4" value="Ip4" label="IPv4"/>
+						<listitem id="priority-ip6" value="Ip6" label="IPv6"/>
+						<listitem id="priority-not-used" value="DontUse" label="&lt;Resolvers below this line will not be used.&gt;"/>
+						<listitem id="priority-tor" value="Tor" label="Tor Hidden Service (.onion)"/>
+						<listitem id="priority-i2p" value="I2p" label="I2P Eepsite"/>
+						-->
+					</listbox>
+					
+					<vbox>
+						<button id="priority-increase" label="Increase Priority" onclick="priorityIncrease();" />
+						<button id="priority-decrease" label="Decrease Priority" onclick="priorityDecrease();" />
+					</vbox>
+				</hbox>
+		
+			</vbox>
+		</tabpanel>
+		
 		<tabpanel id="settingsTab" flex="1">
 			<vbox flex="1">
 	<hbox flex="1">
@@ -53,8 +88,6 @@
 	<checkbox id="connectivity-failure" label="Notary connectivity failure counts as authenticity failure."/>
 	<checkbox id="private-ip-exempt" label="Don't check RFC 1918 (private) IP addresses." />
 	<checkbox id="private-pki-exempt" label="Whitelist private PKI signatures." />
-	<checkbox id="namecoin-blockchain" label="Verify Namecoin (.bit) domains against the blockchain (requires namecoind and nmcontrol)." />
-	<checkbox id="namecoin-only" label="Only verify Namecoin (.bit) domains (other domains will revert to CA verification)." />
 
 	<groupbox>
 		<caption label="Verification Threshold"/>

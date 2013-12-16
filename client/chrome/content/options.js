@@ -42,8 +42,15 @@ function onOptionsSave() {
   settingsManager.setWhitelistPatterns(document.getElementById('exceptions').value);
   settingsManager.setPrivatePkiExempt(document.getElementById('private-pki-exempt').checked);
   settingsManager.setPrivateIpExempt(document.getElementById('private-ip-exempt').checked);
+  settingsManager.setNamecoinResolve(document.getElementById("namecoin-resolve").checked);
   settingsManager.setNamecoinBlockchain(document.getElementById("namecoin-blockchain").checked);
   settingsManager.setNamecoinOnly(document.getElementById("namecoin-only").checked);
+
+  settingsManager.setPriority0(document.getElementById('priority-list').getItemAtIndex(0).value);
+  settingsManager.setPriority1(document.getElementById('priority-list').getItemAtIndex(1).value);
+  settingsManager.setPriority2(document.getElementById('priority-list').getItemAtIndex(2).value);
+  settingsManager.setPriority3(document.getElementById('priority-list').getItemAtIndex(3).value);
+  settingsManager.setPriority4(document.getElementById('priority-list').getItemAtIndex(4).value);
 
   settingsManager.setNotaryList(notaries);
   settingsManager.savePreferences();
@@ -131,6 +138,8 @@ function isAllNotariesDisabled() {
   return true;
 };
 
+var priorityLabels = {"Ip4": "IPv4", "Ip6": "IPv6", "Tor": "Tor Hidden Service (.onion)", "I2p": "I2P Eepsite", "DontUse": "<Resolvers below this line will not be used.>"}
+
 function updateAdvancedSettings() {
   var cacheCertificatesEnabled = convergence.getSettingsManager().getCacheCertificates();
   var notaryBounceEnabled = convergence.getSettingsManager().getNotaryBounce();
@@ -140,8 +149,14 @@ function updateAdvancedSettings() {
   var whitelistPatterns = convergence.getSettingsManager().getWhitelistPatterns();
   var privateIpExempt = convergence.getSettingsManager().getPrivateIpExempt();
   var privatePkiExempt = convergence.getSettingsManager().getPrivatePkiExempt();
+  var namecoinResolve = convergence.getSettingsManager().getNamecoinResolve();
   var namecoinBlockchain = convergence.getSettingsManager().getNamecoinBlockchain();
   var namecoinOnly = convergence.getSettingsManager().getNamecoinOnly();
+  var priority0 = convergence.getSettingsManager().getPriority0();
+  var priority1 = convergence.getSettingsManager().getPriority1();
+  var priority2 = convergence.getSettingsManager().getPriority2();
+  var priority3 = convergence.getSettingsManager().getPriority3();
+  var priority4 = convergence.getSettingsManager().getPriority4();
 
   document.getElementById('cache-certificates').checked = cacheCertificatesEnabled;
   document.getElementById('notary-bounce').checked = notaryBounceEnabled;
@@ -151,8 +166,23 @@ function updateAdvancedSettings() {
   document.getElementById('exceptions').value = whitelistPatterns.source;
   document.getElementById('private-ip-exempt').checked = privateIpExempt;
   document.getElementById('private-pki-exempt').checked = privatePkiExempt;
+  document.getElementById("namecoin-resolve").checked = namecoinResolve;
   document.getElementById("namecoin-blockchain").checked = namecoinBlockchain;
   document.getElementById("namecoin-only").checked = namecoinOnly;
+  
+  if(priority0 != "") document.getElementById('priority-list').appendItem(priorityLabels[priority0], priority0);
+  if(priority1 != "" && priority1 != priority0) document.getElementById('priority-list').appendItem(priorityLabels[priority1], priority1);
+  if(priority2 != "" && priority2 != priority0 && priority2 != priority1) document.getElementById('priority-list').appendItem(priorityLabels[priority2], priority2);
+  if(priority3 != "" && priority3 != priority0 && priority3 != priority1 && priority3 != priority2) document.getElementById('priority-list').appendItem(priorityLabels[priority3], priority3); 
+  if(priority4 != "" && priority4 != priority0 && priority4 != priority1 && priority4 != priority2 && priority4 != priority3) document.getElementById('priority-list').appendItem(priorityLabels[priority4], priority4);
+  
+  var all_resolvers = priority0 + priority1 + priority2 + priority3 + priority4;
+  if(all_resolvers.indexOf("Ip4") == -1) document.getElementById('priority-list').appendItem(priorityLabels["Ip4"], "Ip4");
+  if(all_resolvers.indexOf("Ip6") == -1) document.getElementById('priority-list').appendItem(priorityLabels["Ip6"], "Ip6");
+  if(all_resolvers.indexOf("DontUse") == -1) document.getElementById('priority-list').appendItem(priorityLabels["DontUse"], "DontUse");
+  if(all_resolvers.indexOf("Tor") == -1) document.getElementById('priority-list').appendItem(priorityLabels["Tor"], "Tor");
+  if(all_resolvers.indexOf("I2p") == -1) document.getElementById('priority-list').appendItem(priorityLabels["I2p"], "I2p");
+  
 };
 
 function updateCacheSettings(sortColumn, sortDirection) {
@@ -391,4 +421,31 @@ function sortCacheTree(column) {
 
   this.updateCacheSettings(sortColumn, sortDirection);
   column.setAttribute('sortDirection', sortDirection);
+}
+
+function priorityIncrease() {
+  
+  var index = document.getElementById('priority-list').currentIndex;
+  var label = document.getElementById('priority-list').selectedItem.label;
+  var value = document.getElementById('priority-list').selectedItem.value;  
+  
+  document.getElementById('priority-list').removeItemAt(index);
+  
+  //alert("" + label + "," + value);
+  
+  document.getElementById('priority-list').selectItem(document.getElementById('priority-list').insertItemAt( (index-1 >= 0 ? index-1 : 0), label, value));
+  
+}
+
+function priorityDecrease() {
+
+  var index = document.getElementById('priority-list').currentIndex;
+  var label = document.getElementById('priority-list').selectedItem.label;
+  var value = document.getElementById('priority-list').selectedItem.value;  
+  
+  document.getElementById('priority-list').removeItemAt(index);
+  
+  //alert("" + label + "," + value);
+  
+  document.getElementById('priority-list').selectItem(document.getElementById('priority-list').insertItemAt(index+1, label, value));
 }

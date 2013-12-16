@@ -150,6 +150,27 @@ ConvergenceClientSocket.prototype.readString = function(n) {
   return buffer.readString();
 };
 
+ConvergenceClientSocket.prototype.readBuffer = function(n) {
+  if (n === null) n = 4095;
+  else if (n <= 0) return null;
+
+  var read, buffer = new NSPR.lib.buffer(n);
+
+  while (((read = NSPR.lib.PR_Read(this.fd, buffer, n)) == -1) &&
+      (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR)) {
+    CV9BLog.proto('polling on read...');
+    if (!this.waitForInput(8000)) return null; // TODO: hardcoded fail-timeout
+  }
+
+  if (read <= 0) {
+    CV9BLog.proto('Error read: ' + read + ' , ' + NSPR.lib.PR_GetError());
+    return null;
+  }
+
+  //buffer[read] = 0;
+  return buffer;
+};
+
 ConvergenceClientSocket.prototype.readFully = function(length) {
   var buff, response = '', n = length;
 
