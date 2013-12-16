@@ -307,8 +307,15 @@ Convergence.prototype = {
     if (!this.enabled)
       return proxy;
 
-    // Namecoin always goes through the proxy
+    // Namecoin goes through the proxy if resolution is enabled
     if(this.settingsManager.namecoinResolve && uri.host.substr(-4) == ".bit") {
+      this.connectionManager.setProxyTunnel(proxy);
+      
+      return this.localProxy.getProxyInfo();
+    }
+
+    // Namecoin HTTPS goes through the proxy if verification is enabled
+    if(this.settingsManager.namecoinBlockchain && uri.scheme == "https" && uri.host.substr(-4) == ".bit") {
       this.connectionManager.setProxyTunnel(proxy);
       
       return this.localProxy.getProxyInfo();
