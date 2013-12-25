@@ -13,6 +13,7 @@
 <tabbox flex="1">
 	<tabs>
 		<tab label="Namecoin"/>
+		<tab label="Proxies"/>
 		<tab label="Notaries"/>
 		<tab label="Advanced"/>
 		<tab label="Cache Manager"/>
@@ -53,6 +54,55 @@
 				<description id="anon-warning">WARNING: Tor and I2P support will allow you to access anonymously hosted services.  While your traffic to these domains will be routed anonymously, you will NOT be protected from fingerprinting attacks.  Don't use this feature if the compromise of your anonymity could endanger your safety.</description>
 		
 			</vbox>
+		</tabpanel>
+		
+		<tabpanel id="proxiesTab" flex="1">
+			
+			<vbox flex="1">
+			
+			<description>Choose proxy settings for non-IP resolvers.</description>
+			
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+				</columns>
+				<rows>
+					<row>
+						<label value="Tor"/>
+						<menulist id="proxy-tor-protocol">
+							<menupopup>
+								<menuitem label="HTTP (BROKEN)" value="http"/>
+								<menuitem label="SOCKS5" value="socks"/>
+							</menupopup>
+						</menulist>
+						<label value="Host:"/>
+						<textbox id="proxy-tor-host"/>
+						<label value="Port:"/>
+						<textbox id="proxy-tor-port" type="number"/>
+					</row>
+					<row>
+						<label value="I2P"/>
+						<menulist id="proxy-i2p-protocol">
+							<menupopup>
+								<menuitem label="HTTP (BROKEN)" value="http"/>
+								<menuitem label="SOCKS5" value="socks"/>
+							</menupopup>
+						</menulist>
+						<label value="Host:"/>
+						<textbox id="proxy-i2p-host"/>
+						<label value="Port:"/>
+						<textbox id="proxy-i2p-port" type="number"/>
+					</row>
+				</rows>
+			</grid>
+			
+			</vbox>
+			
 		</tabpanel>
 		
 		<tabpanel id="settingsTab" flex="1">

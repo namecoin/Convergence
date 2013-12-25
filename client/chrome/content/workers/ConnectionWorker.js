@@ -215,7 +215,7 @@ function getNamecoinTor(host) {
 
 function getNamecoinI2p(host) {
 
-  var domainData = getNamecoinDnsField(host, "getI2p");
+  var domainData = getNamecoinDnsField(host, "getI2p_b32");
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -426,12 +426,23 @@ onmessage = function(event) {
 	
 	var new_proxy = event.data.proxy;
 	
+	// ToDo: nest the below if statements
+	// ToDo: move the proxy settings into GUI config
+	
 	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit" && resolvedHost.substr(-6) == ".onion") {
 	  
           new_proxy = {
-            'host' : "localhost",
-            'port' : 9050,
-            'type' : "socks" };
+            'host' : event.data.settings['proxyTorHost'],
+            'port' : event.data.settings['proxyTorPort'],
+            'type' : event.data.settings['proxyTorProtocol'] };
+	}
+	
+	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit" && resolvedHost.substr(-4) == ".i2p") {
+	  
+          new_proxy = {
+            'host' : event.data.settings['proxyI2pHost'],
+            'port' : event.data.settings['proxyI2pPort'],
+            'type' : event.data.settings['proxyI2pProtocol'] };
 	}
 	
 	dump("ConnectionWorker connecting client socket to " + resolvedHost + ":" + destination.port + "\n");

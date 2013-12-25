@@ -24,3 +24,9 @@ tree {min-height: 50px;}
 #anon-warning:not(.active-warning) {
   display: none;
 }
+
+#proxiesTab grid label {
+  margin-top: 10px;
+  margin-bottom: -10px;
+  
+}

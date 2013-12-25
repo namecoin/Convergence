@@ -51,6 +51,13 @@ function onOptionsSave() {
   settingsManager.setPriority2(document.getElementById('priority-list').getItemAtIndex(2).value);
   settingsManager.setPriority3(document.getElementById('priority-list').getItemAtIndex(3).value);
   settingsManager.setPriority4(document.getElementById('priority-list').getItemAtIndex(4).value);
+  
+  settingsManager.setProxyTorProtocol(document.getElementById('proxy-tor-protocol').selectedItem.value);
+  settingsManager.setProxyTorHost(document.getElementById('proxy-tor-host').value);
+  settingsManager.setProxyTorPort(parseInt(document.getElementById('proxy-tor-port').value));
+  settingsManager.setProxyI2pProtocol(document.getElementById('proxy-i2p-protocol').selectedItem.value);
+  settingsManager.setProxyI2pHost(document.getElementById('proxy-i2p-host').value);
+  settingsManager.setProxyI2pPort(parseInt(document.getElementById('proxy-i2p-port').value));
 
   settingsManager.setNotaryList(notaries);
   settingsManager.savePreferences();
@@ -157,6 +164,12 @@ function updateAdvancedSettings() {
   var priority2 = convergence.getSettingsManager().getPriority2();
   var priority3 = convergence.getSettingsManager().getPriority3();
   var priority4 = convergence.getSettingsManager().getPriority4();
+  var proxyTorProtocol = convergence.getSettingsManager().getProxyTorProtocol();
+  var proxyTorHost = convergence.getSettingsManager().getProxyTorHost();
+  var proxyTorPort = convergence.getSettingsManager().getProxyTorPort();
+  var proxyI2pProtocol = convergence.getSettingsManager().getProxyI2pProtocol();
+  var proxyI2pHost = convergence.getSettingsManager().getProxyI2pHost();
+  var proxyI2pPort = convergence.getSettingsManager().getProxyI2pPort();
 
   document.getElementById('cache-certificates').checked = cacheCertificatesEnabled;
   document.getElementById('notary-bounce').checked = notaryBounceEnabled;
@@ -185,6 +198,12 @@ function updateAdvancedSettings() {
   
   updateAnonWarning();
   
+  document.getElementById('proxy-tor-protocol').selectedIndex = (proxyTorProtocol == "http" ? 0 : 1);
+  document.getElementById('proxy-tor-host').value = proxyTorHost;
+  document.getElementById('proxy-tor-port').value = proxyTorPort;
+  document.getElementById('proxy-i2p-protocol').selectedIndex = (proxyI2pProtocol == "http" ? 0 : 1);
+  document.getElementById('proxy-i2p-host').value = proxyI2pHost;
+  document.getElementById('proxy-i2p-port').value = proxyI2pPort;
 };
 
 function updateCacheSettings(sortColumn, sortDirection) {

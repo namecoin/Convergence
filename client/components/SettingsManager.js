@@ -39,6 +39,12 @@ function SettingsManager() {
   this.priority2 = "";
   this.priority3 = "";
   this.priority4 = "";
+  this.proxyTorProtocol = "";
+  this.proxyTorHost = "";
+  this.proxyTorPort = "";
+  this.proxyI2pProtocol = "";
+  this.proxyI2pHost = "";
+  this.proxyI2pPort = "";
   this.maxNotaryQuorum = 3;
   this.whitelistPatterns = new PatternList();
   this.verificationThreshold = 'majority';
@@ -152,6 +158,54 @@ SettingsManager.prototype.getPriority4 = function() {
   return this.priority4;
 };
 
+SettingsManager.prototype.setProxyTorProtocol = function(val) {
+  this.proxyTorProtocol = val;
+};
+
+SettingsManager.prototype.getProxyTorProtocol = function() {
+  return this.proxyTorProtocol;
+};
+
+SettingsManager.prototype.setProxyTorHost = function(val) {
+  this.proxyTorHost = val;
+};
+
+SettingsManager.prototype.getProxyTorHost = function() {
+  return this.proxyTorHost;
+};
+
+SettingsManager.prototype.setProxyTorPort = function(val) {
+  this.proxyTorPort = val;
+};
+
+SettingsManager.prototype.getProxyTorPort = function() {
+  return this.proxyTorPort;
+};
+
+SettingsManager.prototype.setProxyI2pProtocol = function(val) {
+  this.proxyI2pProtocol = val;
+};
+
+SettingsManager.prototype.getProxyI2pProtocol = function() {
+  return this.proxyI2pProtocol;
+};
+
+SettingsManager.prototype.setProxyI2pHost = function(val) {
+  this.proxyI2pHost = val;
+};
+
+SettingsManager.prototype.getProxyI2pHost = function() {
+  return this.proxyI2pHost;
+};
+
+SettingsManager.prototype.setProxyI2pPort = function(val) {
+  this.proxyI2pPort = val;
+};
+
+SettingsManager.prototype.getProxyI2pPort = function() {
+  return this.proxyI2pPort;
+};
+
 SettingsManager.prototype.setVerificationThreshold = function(val) {
   this.verificationThreshold = val;
 };
@@ -245,6 +299,12 @@ SettingsManager.prototype.getSerializedSettings = function() {
     'priority2'                    : this.priority2,
     'priority3'                    : this.priority3,
     'priority4'                    : this.priority4,
+    'proxyTorProtocol'             : this.proxyTorProtocol,
+    'proxyTorHost'                 : this.proxyTorHost,
+    'proxyTorPort'                 : this.proxyTorPort,
+    'proxyI2pProtocol'             : this.proxyI2pProtocol,
+    'proxyI2pHost'                 : this.proxyI2pHost,
+    'proxyI2pPort'                 : this.proxyI2pPort,
     'whitelistPatterns'            : this.whitelistPatterns.source
   };
 };
@@ -344,6 +404,12 @@ SettingsManager.prototype.savePreferences = function() {
   rootElement.setAttribute("priority2", this.priority2);
   rootElement.setAttribute("priority3", this.priority3);
   rootElement.setAttribute("priority4", this.priority4);
+  rootElement.setAttribute("proxyTorProtocol", this.proxyTorProtocol);
+  rootElement.setAttribute("proxyTorHost", this.proxyTorHost);
+  rootElement.setAttribute("proxyTorPort", this.proxyTorPort);
+  rootElement.setAttribute("proxyI2pProtocol", this.proxyI2pProtocol);
+  rootElement.setAttribute("proxyI2pHost", this.proxyI2pHost);
+  rootElement.setAttribute("proxyI2pPort", this.proxyI2pPort);
   rootElement.setAttribute('threshold', this.verificationThreshold);
   rootElement.setAttribute('max_notary_quorum', this.maxNotaryQuorum);
   rootElement.setAttribute('whitelist_patterns', escape(this.whitelistPatterns.source));
@@ -451,6 +517,12 @@ SettingsManager.prototype.loadPreferences = function() {
   this.priority2 = rootElement.item(0).getAttribute('priority2');
   this.priority3 = rootElement.item(0).getAttribute('priority3');
   this.priority4 = rootElement.item(0).getAttribute('priority4');
+  this.proxyTorProtocol = rootElement.item(0).getAttribute('proxyTorProtocol');
+  this.proxyTorHost = rootElement.item(0).getAttribute('proxyTorHost');
+  this.proxyTorPort = rootElement.item(0).getAttribute('proxyTorPort');
+  this.proxyI2pProtocol = rootElement.item(0).getAttribute('proxyI2pProtocol');
+  this.proxyI2pHost = rootElement.item(0).getAttribute('proxyI2pHost');
+  this.proxyI2pPort = rootElement.item(0).getAttribute('proxyI2pPort');
   this.verificationThreshold = rootElement.item(0).getAttribute('threshold');
   this.maxNotaryQuorum = rootElement.item(0).getAttribute('max_notary_quorum');
   this.whitelistPatterns = new PatternList(unescape(rootElement.item(0).getAttribute('whitelist_patterns')));
@@ -506,6 +578,30 @@ SettingsManager.prototype.loadPreferences = function() {
   
   if (!rootElement.item(0).hasAttribute("priority4")) {
     this.priority4 = "I2p";
+  }
+
+  if (!rootElement.item(0).hasAttribute("proxyTorProtocol")) {
+    this.proxyTorProtocol = "socks";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyTorHost")) {
+    this.proxyTorHost = "127.0.0.1";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyTorPort")) {
+    this.proxyTorPort = 9050;
+  }
+
+  if (!rootElement.item(0).hasAttribute("proxyI2pProtocol")) {
+    this.proxyI2pProtocol = "socks";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyI2pHost")) {
+    this.proxyI2pHost = "127.0.0.1";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyI2pPort")) {
+    this.proxyI2pPort = 4446;
   }
 
   if (!rootElement.item(0).hasAttribute('threshold')) {
