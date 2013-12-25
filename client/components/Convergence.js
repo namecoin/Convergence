@@ -27,6 +27,7 @@
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/ctypes.jsm');
 
+
 function Convergence() {
   try {
     this.wrappedJSObject = this;
@@ -51,8 +52,8 @@ function Convergence() {
 
 Convergence.prototype = {
   classDescription:   'Convergence Javascript Component',
-  classID:            Components.ID('{ec13aa86-9da1-41f0-b37e-331a0435fb18}'),
-  contractID:         '@thoughtcrime.org/convergence;1',
+  classID:            Components.ID('{44d8bf5b-d0f8-4e2a-876d-5df3813a56c6}'),
+  contractID:         '@fraggod.net/convergence;1',
   QueryInterface:     XPCOMUtils.generateQI([Components.interfaces.nsIClassInfo]),
   extensionVersion:   '0.0',
   enabled:            true,
@@ -72,17 +73,38 @@ Convergence.prototype = {
       Components.utils.import('resource://gre/modules/Services.jsm');
       Components.utils.import('resource://gre/modules/ctypes.jsm');
 
-      this.nsprFile = Services.dirsvc.get('GreD', Components.interfaces.nsILocalFile);
-      this.nsprFile.append(ctypes.libraryName('nspr4'));
+      var FFLibDir = Services.dirsvc.get('GreD', Components.interfaces.nsILocalFile);
+      var FFLibGet = function(name, fallback) {
+        var libPath = FFLibDir.clone();
+        libPath.append(ctypes.libraryName(name));
+        if (fallback && !libPath.exists()) {
+          var libPathFallback = FFLibDir.clone();
+          libPathFallback.append(ctypes.libraryName(fallback));
+          if (libPathFallback.exists()) {
+            CV9BLog.core('Using fallback (' + fallback + ') for lib ' + name + ': ' + libPathFallback.path);
+            libPath = libPathFallback;
+          }
+        }
+        return libPath;
+      }
 
-      this.nssFile = Services.dirsvc.get('GreD', Components.interfaces.nsILocalFile);
-      this.nssFile.append(ctypes.libraryName('nss3'));
-
-      this.sslFile = Services.dirsvc.get('GreD', Components.interfaces.nsILocalFile);
-      this.sslFile.append(ctypes.libraryName('ssl3'));
-
-      this.sqliteFile = Services.dirsvc.get('GreD', Components.interfaces.nsILocalFile);
-      this.sqliteFile.append(ctypes.libraryName('mozsqlite3'));
+      if (Services.appinfo.OS != 'WINNT') {
+        // Assuming unix-like system - i.e. Linux, FreeBSD.
+        // SInce FF22, all major libs are folded into libxul on unixes, but separate libs
+        //  should also be available, so we use these to (possibly) work with older versions.
+        // libxul is used as a fallback just in case of weirder platforms.
+        // See: https://bugzilla.mozilla.org/show_bug.cgi?id=648407
+        this.nssFile = FFLibGet('nss3', 'xul');
+        this.nsprFile = FFLibGet('nspr4', 'xul');
+        this.sslFile = FFLibGet('ssl3', 'xul');
+        this.sqliteFile = FFLibGet('mozsqlite3', 'xul');
+      } else {
+        // On windows, separate libs are available only until FF22, after which they're folded into nss3.
+        this.nssFile = FFLibGet('nss3');
+        this.nsprFile = FFLibGet('nspr4', 'nss3');
+        this.sslFile = FFLibGet('ssl3', 'nss3');
+        this.sqliteFile = FFLibGet('mozsqlite3', 'nss3');
+      }
 
       NSPR.initialize(this.nsprFile.path);
       NSS.initialize(this.nssFile.path);

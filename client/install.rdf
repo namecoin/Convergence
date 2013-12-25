@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+		 xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>convergence@dot-bit.org</em:id>
@@ -32,8 +32,9 @@ B+AvIFeyywzGtlnfgPVZi2rKTC7rLzxucMfOgoTzl80ElNmLUCOqwU/QUFXHpxCU
    
     <!-- Front End MetaData -->
     <em:name>Convergence for Namecoin</em:name>
-    <em:description>A secure, agile, and distributed replacement for the Certificate Authority system.</em:description>
+    <em:description>Secure peer-to-peer DNS resolution and HTTPS authentication for Firefox, without certificate authorities, using the Namecoin blockchain.</em:description>
     <em:creator>Moxie Marlinspike</em:creator>
+    <em:developer>Jeremy Rand</em:developer>
     <em:homepageURL>http://dot-bit.org</em:homepageURL>
   </Description>      
 </RDF>
