@@ -44,6 +44,9 @@ function Convergence() {
     this.registerObserverService();
 
     this.initializeNotaryUpdateTimer(false);
+    
+    this.initializeNamecoinDaemons();
+    
     CV9BLog.core('Convergence Setup Complete.');
   } catch (e) {
     CV9BLog.core('Initializing error: ' + e + ' , ' + e.stack);
@@ -211,6 +214,72 @@ Convergence.prototype = {
     CV9BLog.core('Timer will fire in: ' + difference);
   },
 
+  initializeNamecoinDaemons: function() {
+    
+    if(this.settingsManager.getDaemonMode() == "namecoind-nmcontrol") {
+      
+      var namecoind_path = __LOCATION__.parent.parent.clone();
+      
+      namecoind_path.append("daemons");
+      namecoind_path.append("namecoind");
+      namecoind_path.append("linux");
+      namecoind_path.append("x64");
+      namecoind_path.append("namecoind");
+      
+      dump("namecoind path: " + namecoind_path.path + "\n");
+      dump("namecoind exists: " + namecoind_path.exists() + "\n");
+      
+      if(namecoind_path.exists()) {
+        
+        // Create the namecoind profile directory if it's not already there
+        Components.utils.import("resource://gre/modules/FileUtils.jsm");
+        var namecoind_profile_dir = FileUtils.getDir("Home", [".convergence-namecoin"], true).path;
+        
+        dump("namecoind profile dir: " + namecoind_profile_dir + "\n");
+        
+        // Start namecoind
+        var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+        process.init(namecoind_path);
+        var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835'] ; // command line arguments array
+        process.run(false, arguments, arguments.length); 
+        dump("namecoind started.\n");
+      }
+      else {
+        dump("namecoind not found.\n");
+      }
+      
+      var nmcontrol_path = __LOCATION__.parent.parent.clone();
+      
+      nmcontrol_path.append("daemons");
+      nmcontrol_path.append("nmcontrol");
+      nmcontrol_path.append("python");
+      nmcontrol_path.append("cd_launcher.sh");
+      
+      dump("nmcontrol path: " + nmcontrol_path.path + "\n");
+      dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
+      
+      if(nmcontrol_path.exists()) {
+      
+        // Create the namecoind profile directory if it's not already there
+        Components.utils.import("resource://gre/modules/FileUtils.jsm");
+        var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
+        namecoin_conf = namecoin_conf + '/namecoin.conf';
+        
+        // Start nmcontrol
+        var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+        process.init(nmcontrol_path);
+        var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836'] ; // command line arguments array
+        process.run(false, arguments, arguments.length); 
+        dump("nmcontrol started.\n");
+      }
+      else {
+        dump("nmcontrol not found.\n");
+      }
+      
+      
+    }
+  },
+
   setEnabled: function(value) {
     if (value && (this.certificateManager == null)) {
       if (this.initializeCertificateManager())
@@ -269,6 +338,67 @@ Convergence.prototype = {
       CV9BLog.core('Got application shutdown request...');
       if (this.connectionManager != null)
         this.connectionManager.shutdown();
+      if(this.settingsManager.getDaemonStop() || (this.settingsManager.getDaemonMode() != "namecoind-nmcontrol") ) {
+        
+        var namecoind_path = __LOCATION__.parent.parent.clone();
+        
+        namecoind_path.append("daemons");
+        namecoind_path.append("namecoind");
+        namecoind_path.append("linux");
+        namecoind_path.append("x64");
+        namecoind_path.append("namecoind");
+        
+        dump("namecoind path: " + namecoind_path.path + "\n");
+        dump("namecoind exists: " + namecoind_path.exists() + "\n");
+        
+        if(namecoind_path.exists()) {
+          
+          // Create the namecoind profile directory if it's not already there
+          Components.utils.import("resource://gre/modules/FileUtils.jsm");
+          var namecoind_profile_dir = FileUtils.getDir("Home", [".convergence-namecoin"], true).path;
+          
+          dump("namecoind profile dir: " + namecoind_profile_dir + "\n");
+          
+          // Stop namecoind
+          var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+          process.init(namecoind_path);
+          var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835', 'stop'] ; // command line arguments array
+          process.run(false, arguments, arguments.length); 
+          dump("namecoind stopped.\n");
+        }
+        else {
+          dump("namecoind not found.\n");
+        }
+        
+        var nmcontrol_path = __LOCATION__.parent.parent.clone();
+      
+        nmcontrol_path.append("daemons");
+        nmcontrol_path.append("nmcontrol");
+        nmcontrol_path.append("python");
+        nmcontrol_path.append("cd_launcher.sh");
+        
+        dump("nmcontrol path: " + nmcontrol_path.path + "\n");
+        dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
+        
+        if(nmcontrol_path.exists()) {
+        
+          // Create the namecoind profile directory if it's not already there
+          Components.utils.import("resource://gre/modules/FileUtils.jsm");
+          var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
+          namecoin_conf = namecoin_conf + '/namecoin.conf';
+          
+          // Stop nmcontrol
+          var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+          process.init(nmcontrol_path);
+          var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836 stop'] ; // command line arguments array
+          process.run(false, arguments, arguments.length); 
+          dump("nmcontrol stopped.\n");
+        }
+        else {
+          dump("nmcontrol not found.\n");
+        }
+          
+      }
     } else if (topic == 'network:offline-status-changed') {
       if (data == 'online') {
         CV9BLog.core('Got network state change, shutting down listensocket...');

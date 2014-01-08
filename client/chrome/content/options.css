@@ -21,7 +21,7 @@ tree {min-height: 50px;}
   border: red solid 3px; padding: 3px;
 }
 
-#anon-warning:not(.active-warning) {
+#anon-warning:not(.active-warning), #daemon-stop:not(.active-option) {
   display: none;
 }
 

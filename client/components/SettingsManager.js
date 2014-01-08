@@ -45,6 +45,8 @@ function SettingsManager() {
   this.proxyI2pProtocol = "";
   this.proxyI2pHost = "";
   this.proxyI2pPort = "";
+  this.daemonMode = "default";
+  this.daemonStop = true;
   this.maxNotaryQuorum = 3;
   this.whitelistPatterns = new PatternList();
   this.verificationThreshold = 'majority';
@@ -206,6 +208,22 @@ SettingsManager.prototype.getProxyI2pPort = function() {
   return this.proxyI2pPort;
 };
 
+SettingsManager.prototype.setDaemonMode = function(val) {
+  this.daemonMode = val;
+};
+
+SettingsManager.prototype.getDaemonMode = function() {
+  return this.daemonMode;
+};
+
+SettingsManager.prototype.setDaemonStop = function(val) {
+  this.daemonStop = val;
+};
+
+SettingsManager.prototype.getDaemonStop = function() {
+  return this.daemonStop;
+};
+
 SettingsManager.prototype.setVerificationThreshold = function(val) {
   this.verificationThreshold = val;
 };
@@ -305,6 +323,8 @@ SettingsManager.prototype.getSerializedSettings = function() {
     'proxyI2pProtocol'             : this.proxyI2pProtocol,
     'proxyI2pHost'                 : this.proxyI2pHost,
     'proxyI2pPort'                 : this.proxyI2pPort,
+    'daemonMode'                   : this.daemonMode,
+    'daemonStop'                   : this.daemonStop,
     'whitelistPatterns'            : this.whitelistPatterns.source
   };
 };
@@ -410,6 +430,8 @@ SettingsManager.prototype.savePreferences = function() {
   rootElement.setAttribute("proxyI2pProtocol", this.proxyI2pProtocol);
   rootElement.setAttribute("proxyI2pHost", this.proxyI2pHost);
   rootElement.setAttribute("proxyI2pPort", this.proxyI2pPort);
+  rootElement.setAttribute("daemonMode", this.daemonMode);
+  rootElement.setAttribute("daemonStop", this.daemonStop);
   rootElement.setAttribute('threshold', this.verificationThreshold);
   rootElement.setAttribute('max_notary_quorum', this.maxNotaryQuorum);
   rootElement.setAttribute('whitelist_patterns', escape(this.whitelistPatterns.source));
@@ -523,6 +545,8 @@ SettingsManager.prototype.loadPreferences = function() {
   this.proxyI2pProtocol = rootElement.item(0).getAttribute('proxyI2pProtocol');
   this.proxyI2pHost = rootElement.item(0).getAttribute('proxyI2pHost');
   this.proxyI2pPort = rootElement.item(0).getAttribute('proxyI2pPort');
+  this.daemonMode = rootElement.item(0).getAttribute('daemonMode');
+  this.daemonStop = (rootElement.item(0).getAttribute("daemonStop") == "true");
   this.verificationThreshold = rootElement.item(0).getAttribute('threshold');
   this.maxNotaryQuorum = rootElement.item(0).getAttribute('max_notary_quorum');
   this.whitelistPatterns = new PatternList(unescape(rootElement.item(0).getAttribute('whitelist_patterns')));
@@ -602,6 +626,14 @@ SettingsManager.prototype.loadPreferences = function() {
   
   if (!rootElement.item(0).hasAttribute("proxyI2pPort")) {
     this.proxyI2pPort = 4446;
+  }
+
+  if (!rootElement.item(0).hasAttribute("daemonMode")) {
+    this.daemonMode = "default";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("daemonStop")) {
+    this.daemonStop = true;
   }
 
   if (!rootElement.item(0).hasAttribute('threshold')) {

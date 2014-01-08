@@ -7,7 +7,7 @@
     <r:Seq>
       <r:li>
         <r:Description>
-          <version>0.10</version>
+          <version>0.12</version>
           <targetApplication>
             <r:Description>
               <!-- Thunderbird -->
@@ -42,7 +42,7 @@
       </r:li>
     </r:Seq>
   </updates>
-  <version>0.10</version>
+  <version>0.12</version>
   <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
   <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
   <signature>

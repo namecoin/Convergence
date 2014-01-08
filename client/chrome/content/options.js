@@ -58,6 +58,143 @@ function onOptionsSave() {
   settingsManager.setProxyI2pProtocol(document.getElementById('proxy-i2p-protocol').selectedItem.value);
   settingsManager.setProxyI2pHost(document.getElementById('proxy-i2p-host').value);
   settingsManager.setProxyI2pPort(parseInt(document.getElementById('proxy-i2p-port').value));
+  
+  settingsManager.setDaemonMode(document.getElementById('daemon-mode').selectedItem.value);
+  settingsManager.setDaemonStop(document.getElementById("daemon-stop").checked);
+
+  // Start or stop the daemons according to user settings
+  if(settingsManager.getDaemonMode() == "namecoind-nmcontrol") {
+      
+      //var namecoind_path = __LOCATION__.parent.parent.clone();
+      
+      var namecoind_path = Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile);
+      namecoind_path.append("extensions");
+      namecoind_path.append("convergence@dot-bit.org"); // guid of extension
+      
+      namecoind_path.append("daemons");
+      namecoind_path.append("namecoind");
+      namecoind_path.append("linux");
+      namecoind_path.append("x64");
+      namecoind_path.append("namecoind");
+      
+      dump("namecoind path: " + namecoind_path.path + "\n");
+      dump("namecoind exists: " + namecoind_path.exists() + "\n");
+      
+      if(namecoind_path.exists()) {
+        
+        // Create the namecoind profile directory if it's not already there
+        Components.utils.import("resource://gre/modules/FileUtils.jsm");
+        var namecoind_profile_dir = FileUtils.getDir("Home", [".convergence-namecoin"], true).path;
+        
+        dump("namecoind profile dir: " + namecoind_profile_dir + "\n");
+        
+        // Start namecoind
+        var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+        process.init(namecoind_path);
+        var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835'] ; // command line arguments array
+        process.run(false, arguments, arguments.length); 
+        dump("namecoind started.\n");
+      }
+      else {
+        dump("namecoind not found.\n");
+      }
+      
+      var nmcontrol_path = Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile);
+      nmcontrol_path.append("extensions");
+      nmcontrol_path.append("convergence@dot-bit.org"); // guid of extension
+      
+      nmcontrol_path.append("daemons");
+      nmcontrol_path.append("nmcontrol");
+      nmcontrol_path.append("python");
+      nmcontrol_path.append("cd_launcher.sh");
+      
+      dump("nmcontrol path: " + nmcontrol_path.path + "\n");
+      dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
+      
+      if(nmcontrol_path.exists()) {
+      
+        // Create the namecoind profile directory if it's not already there
+        Components.utils.import("resource://gre/modules/FileUtils.jsm");
+        var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
+        namecoin_conf = namecoin_conf + '/namecoin.conf';
+        
+        // Start nmcontrol
+        var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+        process.init(nmcontrol_path);
+        var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836'] ; // command line arguments array
+        process.run(false, arguments, arguments.length); 
+        dump("nmcontrol started.\n");
+      }
+      else {
+        dump("nmcontrol not found.\n");
+      }
+      
+  }
+  else {
+        //var namecoind_path = __LOCATION__.parent.parent.clone();
+      
+        var namecoind_path = Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile);
+        namecoind_path.append("extensions");
+        namecoind_path.append("convergence@dot-bit.org"); // guid of extension
+        
+        namecoind_path.append("daemons");
+        namecoind_path.append("namecoind");
+        namecoind_path.append("linux");
+        namecoind_path.append("x64");
+        namecoind_path.append("namecoind");
+        
+        dump("namecoind path: " + namecoind_path.path + "\n");
+        dump("namecoind exists: " + namecoind_path.exists() + "\n");
+        
+        if(namecoind_path.exists()) {
+          
+          // Create the namecoind profile directory if it's not already there
+          Components.utils.import("resource://gre/modules/FileUtils.jsm");
+          var namecoind_profile_dir = FileUtils.getDir("Home", [".convergence-namecoin"], true).path;
+          
+          dump("namecoind profile dir: " + namecoind_profile_dir + "\n");
+          
+          // Stop namecoind
+          var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+          process.init(namecoind_path);
+          var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835', 'stop'] ; // command line arguments array
+          process.run(false, arguments, arguments.length); 
+          dump("namecoind stopped.\n");
+        }
+        else {
+          dump("namecoind not found.\n");
+        }
+        
+        var nmcontrol_path = Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile);
+        nmcontrol_path.append("extensions");
+        nmcontrol_path.append("convergence@dot-bit.org"); // guid of extension
+      
+        nmcontrol_path.append("daemons");
+        nmcontrol_path.append("nmcontrol");
+        nmcontrol_path.append("python");
+        nmcontrol_path.append("cd_launcher.sh");
+        
+        dump("nmcontrol path: " + nmcontrol_path.path + "\n");
+        dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
+        
+        if(nmcontrol_path.exists()) {
+        
+          // Create the namecoind profile directory if it's not already there
+          Components.utils.import("resource://gre/modules/FileUtils.jsm");
+          var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
+          namecoin_conf = namecoin_conf + '/namecoin.conf';
+          
+          // Stop nmcontrol
+          var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+          process.init(nmcontrol_path);
+          var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836 stop'] ; // command line arguments array
+          process.run(false, arguments, arguments.length); 
+          dump("nmcontrol stopped.\n");
+        }
+        else {
+          dump("nmcontrol not found.\n");
+        }
+  }
 
   settingsManager.setNotaryList(notaries);
   settingsManager.savePreferences();
@@ -170,6 +307,8 @@ function updateAdvancedSettings() {
   var proxyI2pProtocol = convergence.getSettingsManager().getProxyI2pProtocol();
   var proxyI2pHost = convergence.getSettingsManager().getProxyI2pHost();
   var proxyI2pPort = convergence.getSettingsManager().getProxyI2pPort();
+  var daemonMode = convergence.getSettingsManager().getDaemonMode();
+  var daemonStop = convergence.getSettingsManager().getDaemonStop();
 
   document.getElementById('cache-certificates').checked = cacheCertificatesEnabled;
   document.getElementById('notary-bounce').checked = notaryBounceEnabled;
@@ -204,6 +343,21 @@ function updateAdvancedSettings() {
   document.getElementById('proxy-i2p-protocol').selectedIndex = (proxyI2pProtocol == "http" ? 0 : 1);
   document.getElementById('proxy-i2p-host').value = proxyI2pHost;
   document.getElementById('proxy-i2p-port').value = proxyI2pPort;
+  
+  if(daemonMode == "default") {
+    document.getElementById('daemon-mode').selectedIndex = 0;
+  }
+  else if(daemonMode == "namecoind-nmcontrol") {
+    document.getElementById('daemon-mode').selectedIndex = 1;
+  }
+  else if(daemonMode == "custom") {
+    document.getElementById('daemon-mode').selectedIndex = 2;
+  }
+  
+  document.getElementById("daemon-stop").checked = daemonStop;
+  
+  daemonModeCommand();
+  
 };
 
 function updateCacheSettings(sortColumn, sortDirection) {
@@ -464,7 +618,7 @@ function updateAnonWarning() {
     }
   }
   
-  var torIndex = document.getElementById('priority-list').currentIndex;
+  //var torIndex = document.getElementById('priority-list').currentIndex;
   
 }
 
@@ -497,4 +651,17 @@ function priorityDecrease() {
   document.getElementById('priority-list').selectItem(document.getElementById('priority-list').insertItemAt(index+1, label, value));
   
   updateAnonWarning();
+}
+
+function daemonModeCommand() {
+  
+  var value = document.getElementById('daemon-mode').selectedItem.value;
+  
+  if(value == "namecoind-nmcontrol") {
+    document.getElementById("daemon-stop").classList.add("active-option");
+  }
+  else {
+    document.getElementById("daemon-stop").classList.remove("active-option");
+  }
+  
 }

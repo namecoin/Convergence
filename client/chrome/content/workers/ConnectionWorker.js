@@ -89,11 +89,22 @@ function sanitiseFingerprint (fpr)
   return res;
 };
 
-function getNamecoinDnsField(host, method) {
+function getNamecoinDnsField(host, method, settings) {
   
     // Mostly adapted from ConvergenceClientSocket.js
 
-  var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
+  var nmcontrol_host;
+  var nmcontrol_port;
+
+  if(settings['daemonMode'] == 'namecoind-nmcontrol') {
+    nmcontrol_host = "127.0.0.1";
+    nmcontrol_port = 18836;
+  } else {
+    nmcontrol_host = "127.0.0.1";
+    nmcontrol_port = 9000;
+  }
+
+  var addrInfo = NSPR.lib.PR_GetAddrInfoByName(nmcontrol_host, 
 					       NSPR.lib.PR_AF_INET, 
 					       NSPR.lib.PR_AI_ADDRCONFIG);
 
@@ -106,7 +117,7 @@ function getNamecoinDnsField(host, method) {
 
   NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
   NSPR.lib.PR_SetNetAddr(NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET, 
-			 9000, netAddress);
+			 nmcontrol_port, netAddress);
   
   var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
 
@@ -165,9 +176,9 @@ function getNamecoinDnsField(host, method) {
   return domainData;
 };
 
-function getNamecoinIp4(host) {
+function getNamecoinIp4(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getIp4");
+  var domainData = getNamecoinDnsField(host, "getIp4", settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -181,9 +192,9 @@ function getNamecoinIp4(host) {
   
 };
 
-function getNamecoinIp6(host) {
+function getNamecoinIp6(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getIp6");
+  var domainData = getNamecoinDnsField(host, "getIp6", settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -197,9 +208,9 @@ function getNamecoinIp6(host) {
   
 };
 
-function getNamecoinTor(host) {
+function getNamecoinTor(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getOnion");
+  var domainData = getNamecoinDnsField(host, "getOnion", settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -213,9 +224,9 @@ function getNamecoinTor(host) {
   
 };
 
-function getNamecoinI2p(host) {
+function getNamecoinI2p(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getI2p_b32");
+  var domainData = getNamecoinDnsField(host, "getI2p_b32", settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -246,7 +257,7 @@ function getNamecoinResolution(host, settings) {
     dump("Checking resolver " + settings['priority'+priority] + "\n");
     
     // Resolve the domain using the currently iterated resolver
-    resolvedData = namecoinResolvers[settings['priority'+priority]](host);
+    resolvedData = namecoinResolvers[settings['priority'+priority]](host, settings);
     
     // Check if nmcontrol is complaining about "ns"
     if (resolvedData instanceof Array && resolvedData[0] && resolvedData.indexOf("ns")>=0) {
@@ -278,9 +289,9 @@ function getNamecoinResolution(host, settings) {
   
 };
 
-function getNamecoinFingerprint(host) {
+function getNamecoinFingerprint(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getFingerprint");
+  var domainData = getNamecoinDnsField(host, "getFingerprint", settings);
   
   // returns empty array when no fingerprint found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -302,7 +313,7 @@ function getNamecoinFingerprint(host) {
 
 function checkCertificateValidity(
   certificateCache, activeNotaries, host, port, ip,
-  certificateInfo, privatePkiExempt, namecoinBlockchain)
+  certificateInfo, privatePkiExempt, namecoinBlockchain, settings)
 {
   var target = host + ':' + port;
 
@@ -331,7 +342,7 @@ function checkCertificateValidity(
   if(namecoinBlockchain && host.substr(-4) == ".bit") {
     dump("Checking Namecoin blockchain...\n");
 	
-	var namecoinFingerprints = getNamecoinFingerprint (host);
+	var namecoinFingerprints = getNamecoinFingerprint (host, settings);
         var wantedFingerprint = sanitiseFingerprint (certificateInfo.sha1);
 	
 	if (namecoinFingerprints instanceof Array
@@ -465,7 +476,7 @@ onmessage = function(event) {
 
     var results = this.checkCertificateValidity(certificateCache, activeNotaries,
 						destination.host, destination.port, targetSocket.ip,
-						certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain']);
+						certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain'], event.data.settings);
 
     CV9BLog.worker_conn('Validity check results:', results);
 

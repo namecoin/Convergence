@@ -28,7 +28,21 @@
 				<checkbox id="namecoin-resolve" label="Resolve Namecoin (.bit) DNS against the blockchain (requires namecoind and nmcontrol)." />
 				<checkbox id="namecoin-blockchain" label="Verify Namecoin (.bit) TLS against the blockchain (requires namecoind and nmcontrol)." />
 				<checkbox id="namecoin-only" label="Only verify Namecoin (.bit) domains (other domains will revert to CA verification)." />
+
+				<separator />
 				
+				<description>What Namecoin software do you already have installed?</description>
+				
+				<menulist id="daemon-mode" oncommand="daemonModeCommand();">
+					<menupopup>
+						<menuitem label="I already have nmcontrol on the default port." value="default"/>
+						<menuitem label="I don't have namecoind or nmcontrol; use the bundled versions." value="namecoind-nmcontrol"/>
+						<menuitem label="I want to use a custom nmcontrol installation." value="custom"/>
+					</menupopup>
+				</menulist>
+				
+				<checkbox id="daemon-stop" label="Stop bundled namecoind and nmcontrol when exiting Firefox." />
+							
 				<separator />
 				
 				<description>Choose the priority for which resolution methods should be used for Namecoin (.bit) domains.</description>
@@ -46,8 +60,8 @@
 					</listbox>
 					
 					<vbox>
-						<button id="priority-increase" label="Increase Priority" onclick="priorityIncrease();" />
-						<button id="priority-decrease" label="Decrease Priority" onclick="priorityDecrease();" />
+						<button id="priority-increase" label="Increase Priority" oncommand="priorityIncrease();" />
+						<button id="priority-decrease" label="Decrease Priority" oncommand="priorityDecrease();" />
 					</vbox>
 				</hbox>
 		
