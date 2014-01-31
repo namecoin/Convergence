@@ -1,5 +1,5 @@
 # Variables
-EXTENSION_NAME=Convergence
+EXTENSION_NAME=FreeSpeechMe
 XPI_NAME=$(EXTENSION_NAME).xpi
 ZIP_NAME=$(EXTENSION_NAME).zip
 

@@ -47,7 +47,7 @@ function Convergence() {
     
     this.initializeNamecoinDaemons();
     
-    CV9BLog.core('Convergence Setup Complete.');
+    CV9BLog.core('FreeSpeechMe Setup Complete.');
   } catch (e) {
     CV9BLog.core('Initializing error: ' + e + ' , ' + e.stack);
   }
@@ -163,7 +163,7 @@ Convergence.prototype = {
     try {
       this.certificateManager = new CertificateManager();
     } catch (e) {
-      CV9BLog.core('User declined password entry, disabling convergence...');
+      CV9BLog.core('User declined password entry, disabling FreeSpeechMe...');
       this.certificateManager = null;
       this.enabled = false;
       return false;

@@ -2,8 +2,9 @@
 <?xml-stylesheet href="options.css" type="text/css"?>
 
 <dialog id="convergence-options"
-	title="Convergence Notary Preferences"
+	title="FreeSpeechMe Preferences"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	width="620" height="450" buttons="accept,cancel" onload="onOptionsLoad();"
 	ondialogaccept="return onOptionsSave();">
 
@@ -19,12 +20,13 @@
 		<tab label="Advanced"/>
 		<tab label="Cache Manager"/>
 		<tab label="Exceptions"/>
+		<tab label="About"/>
 	</tabs>
 	<tabpanels flex="1">
 		
 		<tabpanel id="namecoinTab" flex="1">
 				
-			<vbox flex="1">
+			<vbox flex="1" style='overflow: auto;'>
 				
 				<checkbox id="namecoin-resolve" label="Resolve Namecoin (.bit) DNS against the blockchain (requires namecoind and nmcontrol)." />
 				<checkbox id="namecoin-blockchain" label="Verify Namecoin (.bit) TLS against the blockchain (requires namecoind and nmcontrol)." />
@@ -72,7 +74,7 @@
 		</tabpanel>
 
 		<tabpanel id="statusTab">
-			<vbox flex="1">
+			<vbox flex="1" style='overflow: auto;'>
 				<description>Output from namecoind:</description>
 				<textbox id="namecoind-output" readonly="true" flex="1" multiline="true" value="Loading..."/>
 			</vbox>
@@ -80,7 +82,7 @@
 		
 		<tabpanel id="proxiesTab" flex="1">
 			
-			<vbox flex="1">
+			<vbox flex="1" style='overflow: auto;'>
 			
 			<description>Choose proxy settings for non-IP resolvers.</description>
 			
@@ -128,7 +130,7 @@
 		</tabpanel>
 		
 		<tabpanel id="settingsTab" flex="1">
-			<vbox flex="1">
+			<vbox flex="1" style='overflow: auto;'>
 	<hbox flex="1">
 
 		<tree id="notaryTree" onclick="onTreeSelected();" align="stretch" flex="1" editable="true">
@@ -156,7 +158,7 @@
 			</vbox>
 		</tabpanel>
 		<tabpanel id="advancedTab">
-			<vbox flex="0">
+			<vbox flex="0" style='overflow: auto;'>
 	<checkbox id="cache-certificates" label="Cache certificates locally." />
 	<checkbox id="notary-bounce" label="Anonymize communication with notaries." />
 	<checkbox id="connectivity-failure" label="Notary connectivity failure counts as authenticity failure."/>
@@ -180,7 +182,7 @@
 	</vbox>
 		</tabpanel>
 		<tabpanel id="cacheTab">
-			<vbox flex="1">
+			<vbox flex="1" style='overflow: auto;'>
 	<hbox flex="1">
 		<tree id="cacheTree" align="stretch" flex="1" editable="true" persist="sortDirection" sortDirection="natural">
 			<treecols>
@@ -207,9 +209,39 @@
 		</tabpanel>
 
 		<tabpanel id="exceptionsTab">
-			<vbox flex="1">
-				<description style="white-space: pre-wrap;">List of regexp patterns to match "host" part of an URL (e.g. "^.*\.google\.\w{1,3}$", can be a raw IP address - as entered) that should not be proxied through Convergence. One JS regexp per line.</description>
+			<vbox flex="1" style='overflow: auto;'>
+				<description style="white-space: pre-wrap;">List of regexp patterns to match "host" part of an URL (e.g. "^.*\.google\.\w{1,3}$", can be a raw IP address - as entered) that should not be proxied through FreeSpeechMe. One JS regexp per line.</description>
 				<textbox id="exceptions" flex="1" wrap="off" multiline="true" />
+			</vbox>
+		</tabpanel>
+		
+		<tabpanel id="aboutTab">
+			<vbox flex="1" style='overflow: auto;'>
+				<description style="white-space: pre-wrap;">FreeSpeechMe Plugin for Windows and Linux.
+From Viral Electron Chaos Laboratories.
+Website: <html:a class="url" href="http://www.freespeechme.org">http://www.freespeechme.org</html:a>
+				
+Credits:
+				
+Jeremy Rand: FreeSpeechMe Creator and Programmer
+Michael W. Dean: FreeSpeechMe Publicity, Beta Testing, Copywriting, Tech Tutorials, Cat Herding, Cheerleading
+				
+Appamatto and Aaron Swartz: BitDNS and SquareZooko proposals
+Moxie Marlinspike and Mike Kazantsev: Convergence
+phelix and the Namecoin Marketing and Development Fund: Supporting the TLS and Tor/I2P bounties
+itsnotlupus: Adding TLS to Dot-Bit specification
+khal: nmcontrol
+khal and vinced: namecoind
+
+Source code at <html:a class="url" href="https://github.com/namecoin/Convergence">https://github.com/namecoin/Convergence</html:a>.
+
+License:
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <html:a class="url" href="https://www.gnu.org/licenses/gpl-3.0.txt">GNU General Public License for more details.</html:a>
+
+</description>
 			</vbox>
 		</tabpanel>
 

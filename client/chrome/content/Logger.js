@@ -48,7 +48,7 @@ var CV9BLog = { // my attempt to produce short yet fairly unique id
     if (!CV9BLog.print_flags[flag] && !CV9BLog.print_all) { return; }
     if (json) line += CV9BLog.print_json(json);
     if (line.search('\n') != -1) line = '|\n  ' + line.replace(/^\s+|\s+$/, '').split('\n').join('\n  ');
-    line = 'Convergence' + (CV9BLog.print_component ? '.' + flag : '') + ': ' + line + '\n';
+    line = 'FreeSpeechMe' + (CV9BLog.print_component ? '.' + flag : '') + ': ' + line + '\n';
     dump(line);
     try { Firebug.Console.log(line); } catch(e) { } // this line works in extensions
     try { console.log(line); } catch(e) { } // this line works in HTML files

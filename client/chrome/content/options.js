@@ -283,7 +283,7 @@ function onOptionsSave() {
   issuePreferencesChangedNotification();
 
   if (isAllNotariesDisabled()) {
-    alert('No configured notaries are enabled, disabling Convergence.');
+    alert('No configured notaries are enabled, disabling FreeSpeechMe.');
     convergence.setEnabled(false);
     issueConvergenceDisabledNotification();
   }
