@@ -13,6 +13,7 @@
 <tabbox flex="1">
 	<tabs>
 		<tab label="Namecoin"/>
+		<tab label="Status"/>
 		<tab label="Proxies"/>
 		<tab label="Notaries"/>
 		<tab label="Advanced"/>
@@ -67,6 +68,13 @@
 		
 				<description id="anon-warning">WARNING: Tor and I2P support will allow you to access anonymously hosted services.  While your traffic to these domains will be routed anonymously, you will NOT be protected from fingerprinting attacks.  Don't use this feature if the compromise of your anonymity could endanger your safety.</description>
 		
+			</vbox>
+		</tabpanel>
+
+		<tabpanel id="statusTab">
+			<vbox flex="1">
+				<description>Output from namecoind:</description>
+				<textbox id="namecoind-output" readonly="true" flex="1" multiline="true" value="Loading..."/>
 			</vbox>
 		</tabpanel>
 		

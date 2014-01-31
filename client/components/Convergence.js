@@ -222,9 +222,19 @@ Convergence.prototype = {
       
       namecoind_path.append("daemons");
       namecoind_path.append("namecoind");
-      namecoind_path.append("linux");
-      namecoind_path.append("x64");
-      namecoind_path.append("namecoind");
+      
+      if (Services.appinfo.OS != 'WINNT') {
+        dump("Linux in use\n");
+        namecoind_path.append("linux");
+        namecoind_path.append("x64");
+        namecoind_path.append("namecoind");
+      }
+      else {
+        dump("Windows in use\n");
+        namecoind_path.append("windows");
+        namecoind_path.append("x64");
+        namecoind_path.append("namecoind.exe");
+      }
       
       dump("namecoind path: " + namecoind_path.path + "\n");
       dump("namecoind exists: " + namecoind_path.exists() + "\n");
@@ -240,7 +250,14 @@ Convergence.prototype = {
         // Start namecoind
         var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
         process.init(namecoind_path);
-        var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835'] ; // command line arguments array
+        if (Services.appinfo.OS != 'WINNT') {
+          dump("Linux in use\n");
+          var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835'] ; // command line arguments array
+        }
+        else {
+          dump("Windows in use\n");
+          var arguments= ['-datadir=' + namecoind_profile_dir + '\\', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835'] ; // command line arguments array
+        }
         process.run(false, arguments, arguments.length); 
         dump("namecoind started.\n");
       }
@@ -252,8 +269,17 @@ Convergence.prototype = {
       
       nmcontrol_path.append("daemons");
       nmcontrol_path.append("nmcontrol");
-      nmcontrol_path.append("python");
-      nmcontrol_path.append("cd_launcher.sh");
+      
+      if (Services.appinfo.OS != 'WINNT') {
+        dump("Linux in use");
+        nmcontrol_path.append("python");
+        nmcontrol_path.append("cd_launcher.sh");
+      }
+      else {
+        dump("Windows in use");
+        nmcontrol_path.append("windows");
+        nmcontrol_path.append("cd_launcher.bat");
+      }
       
       dump("nmcontrol path: " + nmcontrol_path.path + "\n");
       dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
@@ -263,12 +289,26 @@ Convergence.prototype = {
         // Create the namecoind profile directory if it's not already there
         Components.utils.import("resource://gre/modules/FileUtils.jsm");
         var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
-        namecoin_conf = namecoin_conf + '/namecoin.conf';
+        if (Services.appinfo.OS != 'WINNT') {
+          dump("Linux in use\n");
+          namecoin_conf = namecoin_conf + '/namecoin.conf';
+        }
+        else {
+          dump("Windows in use\n");
+          namecoin_conf = namecoin_conf + '\\namecoin.conf';
+        }
         
         // Start nmcontrol
         var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
         process.init(nmcontrol_path);
-        var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836'] ; // command line arguments array
+        if (Services.appinfo.OS != 'WINNT') {
+          dump("Linux in use\n");
+          var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836'] ; // command line arguments array
+        }
+        else {
+          dump("Windows in use\n");
+          var arguments= [nmcontrol_path.parent.clone().path, 'nmcontrol.exe --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836'] ; // command line arguments array
+        }
         process.run(false, arguments, arguments.length); 
         dump("nmcontrol started.\n");
       }
@@ -344,9 +384,19 @@ Convergence.prototype = {
         
         namecoind_path.append("daemons");
         namecoind_path.append("namecoind");
-        namecoind_path.append("linux");
-        namecoind_path.append("x64");
-        namecoind_path.append("namecoind");
+       
+        if (Services.appinfo.OS != 'WINNT') {
+          dump("Linux in use\n");
+          namecoind_path.append("linux");
+          namecoind_path.append("x64");
+          namecoind_path.append("namecoind");
+        }
+        else {
+          dump("Windows in use\n");
+          namecoind_path.append("windows");
+          namecoind_path.append("x64");
+          namecoind_path.append("namecoind.exe");
+        }
         
         dump("namecoind path: " + namecoind_path.path + "\n");
         dump("namecoind exists: " + namecoind_path.exists() + "\n");
@@ -362,7 +412,14 @@ Convergence.prototype = {
           // Stop namecoind
           var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
           process.init(namecoind_path);
-          var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835', 'stop'] ; // command line arguments array
+          if (Services.appinfo.OS != 'WINNT') {
+            dump("Linux in use\n");
+            var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835', 'stop'] ; // command line arguments array
+          }
+          else {
+            dump("Windows in use\n");
+            var arguments= ['-datadir=' + namecoind_profile_dir + '\\', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835', 'stop'] ; // command line arguments array
+          }
           process.run(false, arguments, arguments.length); 
           dump("namecoind stopped.\n");
         }
@@ -374,8 +431,17 @@ Convergence.prototype = {
       
         nmcontrol_path.append("daemons");
         nmcontrol_path.append("nmcontrol");
-        nmcontrol_path.append("python");
-        nmcontrol_path.append("cd_launcher.sh");
+       
+        if (Services.appinfo.OS != 'WINNT') {
+          dump("Linux in use");
+          nmcontrol_path.append("python");
+          nmcontrol_path.append("cd_launcher.sh");
+        }
+        else {
+          dump("Windows in use");
+          nmcontrol_path.append("windows");
+          nmcontrol_path.append("cd_launcher.bat");
+        }
         
         dump("nmcontrol path: " + nmcontrol_path.path + "\n");
         dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
@@ -385,12 +451,26 @@ Convergence.prototype = {
           // Create the namecoind profile directory if it's not already there
           Components.utils.import("resource://gre/modules/FileUtils.jsm");
           var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
-          namecoin_conf = namecoin_conf + '/namecoin.conf';
+          if (Services.appinfo.OS != 'WINNT') {
+            dump("Linux in use\n");
+            namecoin_conf = namecoin_conf + '/namecoin.conf';
+          }
+          else {
+            dump("Windows in use\n");
+            namecoin_conf = namecoin_conf + '\\namecoin.conf';
+          }
           
           // Stop nmcontrol
           var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
           process.init(nmcontrol_path);
-          var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836 stop'] ; // command line arguments array
+          if (Services.appinfo.OS != 'WINNT') {
+            dump("Linux in use\n");
+            var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836 stop'] ; // command line arguments array
+          }
+          else {
+            dump("Windows in use\n");
+            var arguments= [nmcontrol_path.parent.clone().path, 'nmcontrol.exe --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836 stop'] ; // command line arguments array
+          }
           process.run(false, arguments, arguments.length); 
           dump("nmcontrol stopped.\n");
         }
