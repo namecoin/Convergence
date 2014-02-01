@@ -219,7 +219,7 @@
 			<vbox flex="1" style='overflow: auto;'>
 				<description style="white-space: pre-wrap;">FreeSpeechMe Plugin for Windows and Linux.
 From Viral Electron Chaos Laboratories.
-Website: <html:a class="url" href="http://www.freespeechme.org">http://www.freespeechme.org</html:a>
+Website: <html:a class="url" href="http://www.freespeechme.org" target="_blank">http://www.freespeechme.org</html:a>
 				
 Credits:
 				
@@ -233,13 +233,13 @@ itsnotlupus: Adding TLS to Dot-Bit specification
 khal: nmcontrol
 khal and vinced: namecoind
 
-Source code at <html:a class="url" href="https://github.com/namecoin/Convergence">https://github.com/namecoin/Convergence</html:a>.
+Source code at <html:a class="url" href="https://github.com/namecoin/Convergence" target="_blank">https://github.com/namecoin/Convergence</html:a>.
 
 License:
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <html:a class="url" href="https://www.gnu.org/licenses/gpl-3.0.txt">GNU General Public License for more details.</html:a>
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <html:a class="url" href="https://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">GNU General Public License for more details.</html:a>
 
 </description>
 			</vbox>
