@@ -1,8 +1,8 @@
-# Convergence for Namecoin
+# FreeSpeechMe
 
-Convergence for Namecoin is a modification to Moxie Marlinspike's tool Convergence, modified to implement the Namecoin .bit specification.  It can resolve .bit domains to IPv4 addresses, and verify .bit TLS certficates via the Namecoin blockchain.  This allows safe usage of self-signed certificates, without trusting any third party.  IP address mappings and TLS fingerprints are stored in the Namecoin blockchain; see the .bit specification for more details.
+FreeSpeechMe is a modification to Moxie Marlinspike's tool Convergence, modified to implement the Namecoin .bit specification.  It can resolve .bit domains to IPv4 addresses, and verify .bit TLS certficates via the Namecoin blockchain.  This allows safe usage of self-signed certificates, without trusting any third party.  IP address mappings and TLS fingerprints are stored in the Namecoin blockchain; see the .bit specification for more details.
 
-Convergence for Namecoin is a product of Viral Electron Chaos Laboratories (VECLabs).
+FreeSpeechMe is a product of Viral Electron Chaos Laboratories (VECLabs).
 
 ## End-User Installation
 
@@ -17,7 +17,7 @@ Convergence for Namecoin is a product of Viral Electron Chaos Laboratories (VECL
 
 ## Website Administrators
 
-Website Administrators should place the SHA-1 fingerprint of their website in the "fingerprint" field of their Namecoin domain.  Note that the newer "tls" field is not yet supported.  The fingerprint may either include or omit colons.  Convergence is not aware of SNI (this is a good thing for privacy reasons); the "fingerprint" field should contain the fingerprint of the certificate presented to browsers when the IP address is typed into the browser.  (The "Common Name" of the certificate does not need to match the domain; only the fingerprint is checked.)  To debug websites which generate a "Convergence Certificate Verification Failure", you can click "View Details" in the yellow bar that appears on the top of the page, and then click "View"; Convergence will show you the certificate it received from the server.  Consult the .bit specification for more information on how to embed TLS fingerprints in the Namecoin blockchain.  An example configuration is at "d/namecoin-tls-test-3".
+Website Administrators should place the SHA-1 fingerprint of their website in the "fingerprint" field of their Namecoin domain.  Note that the newer "tls" field is not yet supported.  The fingerprint may either include or omit colons.  FreeSpeechMe is not aware of SNI (this is a good thing for privacy reasons); the "fingerprint" field should contain the fingerprint of the certificate presented to browsers when the IP address is typed into the browser.  (The "Common Name" of the certificate does not need to match the domain; only the fingerprint is checked.)  To debug websites which generate a "Convergence Certificate Verification Failure", you can click "View Details" in the yellow bar that appears on the top of the page, and then click "View"; Convergence will show you the certificate it received from the server.  Consult the .bit specification for more information on how to embed TLS fingerprints in the Namecoin blockchain.  An example configuration is at "d/namecoin-tls-test-3".
 
 ## Known Bugs
 
@@ -25,10 +25,10 @@ Website Administrators should place the SHA-1 fingerprint of their website in th
 
 ## Donate
 
-If you like Convergence for Namecoin and want to show your support, you can donate at the following addresses:
+If you like FreeSpeechMe and want to show your support, you can donate at the following addresses:
 
-* Bitcoin: 19XajoDkrxKeDcXaCJVhBMeK83RSQ69HEV
-* Namecoin: NCN4RnK2mKrLmYcLpNYvuLc1cZpTtiV7ZZ
+* Bitcoin: 1JfNztz7GfcxPFXQTnxjco6HA53fg491FV
+* Namecoin: N4hnrzpQAiwwYXjvMVfqeoenUsvjZNRifV
 
 ## Thanks to:
 

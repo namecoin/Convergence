@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+		 xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>convergence@dot-bit.org</em:id>
-    <em:version>0.10</em:version>
+    <em:version>0.12</em:version>
     <em:type>2</em:type>
     <em:optionsURL>chrome://convergence/content/options.xul</em:optionsURL>
     <em:unpack>true</em:unpack>
@@ -18,7 +18,7 @@ DDEXov/4O0AAtAilprTY6BKYGpSx2rw2VLReXw4pTLgQoMyo3IQyPb8qekJEMSn6
 B+AvIFeyywzGtlnfgPVZi2rKTC7rLzxucMfOgoTzl80ElNmLUCOqwU/QUFXHpxCU
 +QIDAQAB
     </em:updateKey>
-    <em:updateURL>http://dot-bit.org/files/Convergence.rdf</em:updateURL>
+    <em:updateURL>https://dot-bit.org/files/FreeSpeechMe.rdf</em:updateURL>
    
     <!-- Target Application this extension can install into, 
          with minimum and maximum supported versions. --> 
@@ -31,9 +31,12 @@ B+AvIFeyywzGtlnfgPVZi2rKTC7rLzxucMfOgoTzl80ElNmLUCOqwU/QUFXHpxCU
     </em:targetApplication>
    
     <!-- Front End MetaData -->
-    <em:name>Convergence for Namecoin</em:name>
-    <em:description>A secure, agile, and distributed replacement for the Certificate Authority system.</em:description>
-    <em:creator>Moxie Marlinspike</em:creator>
-    <em:homepageURL>http://dot-bit.org</em:homepageURL>
+    <em:name>FreeSpeechMe</em:name>
+    <em:description>Secure trust-free peer-to-peer DNS resolution and HTTPS authentication for Firefox, without certificate authorities, using the Namecoin blockchain.</em:description>
+    <em:creator>Jeremy Rand</em:creator>
+    <em:developer>Michael W. Dean</em:developer>
+    <em:developer>Moxie Marlinspike</em:developer>
+    <em:developer>Mike Kazantsev</em:developer>
+    <em:homepageURL>https://dot-bit.org</em:homepageURL>
   </Description>      
 </RDF>

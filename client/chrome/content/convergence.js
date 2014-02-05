@@ -57,7 +57,7 @@ var Convergence = {
   },
 
   displayCertificateFailureNotification: function(status) {
-    var message = 'Convergence Certificate Verification Failure';
+    var message = 'FreeSpeechMe Certificate Verification Failure';
     var nb = gBrowser.getNotificationBox();
     var n = nb.getNotificationWithValue('convergence-certificate-error');
 
@@ -104,7 +104,7 @@ var Convergence = {
   },
 
   initializeConvergenceManager: function() {
-    this.convergenceManager = Components.classes['@thoughtcrime.org/convergence;1']
+    this.convergenceManager = Components.classes['@fraggod.net/convergence;1']
     .getService().wrappedJSObject;
     this.certificateStatus = new CertificateStatus(this.convergenceManager);
   },
@@ -174,7 +174,7 @@ var Convergence = {
     if (!this.convergenceManager.isEnabled() &&
         !this.convergenceManager.getSettingsManager().hasEnabledNotary())
     {
-      alert('Unable to activate Convergence, no configured notaries are enabled.');
+      alert('Unable to activate FreeSpeechMe, no configured notaries are enabled.');
       return;
     }
 

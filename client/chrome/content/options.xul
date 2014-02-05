@@ -2,8 +2,9 @@
 <?xml-stylesheet href="options.css" type="text/css"?>
 
 <dialog id="convergence-options"
-	title="Convergence Notary Preferences"
+	title="FreeSpeechMe Preferences"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	width="620" height="450" buttons="accept,cancel" onload="onOptionsLoad();"
 	ondialogaccept="return onOptionsSave();">
 
@@ -12,14 +13,124 @@
 
 <tabbox flex="1">
 	<tabs>
+		<tab label="Namecoin"/>
+		<tab label="Status"/>
+		<tab label="Proxies"/>
 		<tab label="Notaries"/>
 		<tab label="Advanced"/>
 		<tab label="Cache Manager"/>
 		<tab label="Exceptions"/>
+		<tab label="About"/>
 	</tabs>
 	<tabpanels flex="1">
+		
+		<tabpanel id="namecoinTab" flex="1">
+				
+			<vbox flex="1" style='overflow: auto;'>
+				
+				<checkbox id="namecoin-resolve" label="Resolve Namecoin (.bit) DNS against the blockchain (requires namecoind and nmcontrol)." />
+				<checkbox id="namecoin-blockchain" label="Verify Namecoin (.bit) TLS against the blockchain (requires namecoind and nmcontrol)." />
+				<checkbox id="namecoin-only" label="Only verify Namecoin (.bit) domains (other domains will revert to CA verification)." />
+
+				<separator />
+				
+				<description>What Namecoin software do you already have installed?</description>
+				
+				<menulist id="daemon-mode" oncommand="daemonModeCommand();">
+					<menupopup>
+						<menuitem label="I already have nmcontrol on the default port." value="default"/>
+						<menuitem label="I don't have namecoind or nmcontrol; use the bundled versions." value="namecoind-nmcontrol"/>
+						<menuitem label="I want to use a custom nmcontrol installation." value="custom"/>
+					</menupopup>
+				</menulist>
+				
+				<checkbox id="daemon-stop" label="Stop bundled namecoind and nmcontrol when exiting Firefox." />
+							
+				<separator />
+				
+				<description>Choose the priority for which resolution methods should be used for Namecoin (.bit) domains.</description>
+				
+				<hbox flex="1">	
+					<listbox flex="1" id="priority-list">
+						<!-- This was moved to Javascript -->
+						<!--
+						<listitem id="priority-ip4" value="Ip4" label="IPv4"/>
+						<listitem id="priority-ip6" value="Ip6" label="IPv6"/>
+						<listitem id="priority-not-used" value="DontUse" label="&lt;Resolvers below this line will not be used.&gt;"/>
+						<listitem id="priority-tor" value="Tor" label="Tor Hidden Service (.onion)"/>
+						<listitem id="priority-i2p" value="I2p" label="I2P Eepsite"/>
+						-->
+					</listbox>
+					
+					<vbox>
+						<button id="priority-increase" label="Increase Priority" oncommand="priorityIncrease();" />
+						<button id="priority-decrease" label="Decrease Priority" oncommand="priorityDecrease();" />
+					</vbox>
+				</hbox>
+		
+				<description id="anon-warning">WARNING: Tor and I2P support will allow you to access anonymously hosted services.  While your traffic to these domains will be routed anonymously, you will NOT be protected from fingerprinting attacks.  Don't use this feature if the compromise of your anonymity could endanger your safety.</description>
+		
+			</vbox>
+		</tabpanel>
+
+		<tabpanel id="statusTab">
+			<vbox flex="1" style='overflow: auto;'>
+				<description>Output from namecoind:</description>
+				<textbox id="namecoind-output" readonly="true" flex="1" multiline="true" value="Loading..."/>
+			</vbox>
+		</tabpanel>
+		
+		<tabpanel id="proxiesTab" flex="1">
+			
+			<vbox flex="1" style='overflow: auto;'>
+			
+			<description>Choose proxy settings for non-IP resolvers.</description>
+			
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+					<column/>
+				</columns>
+				<rows>
+					<row>
+						<label value="Tor"/>
+						<menulist id="proxy-tor-protocol">
+							<menupopup>
+								<menuitem label="HTTP (BROKEN)" value="http"/>
+								<menuitem label="SOCKS5" value="socks"/>
+							</menupopup>
+						</menulist>
+						<label value="Host:"/>
+						<textbox id="proxy-tor-host"/>
+						<label value="Port:"/>
+						<textbox id="proxy-tor-port" type="number"/>
+					</row>
+					<row>
+						<label value="I2P"/>
+						<menulist id="proxy-i2p-protocol">
+							<menupopup>
+								<menuitem label="HTTP (BROKEN)" value="http"/>
+								<menuitem label="SOCKS5" value="socks"/>
+							</menupopup>
+						</menulist>
+						<label value="Host:"/>
+						<textbox id="proxy-i2p-host"/>
+						<label value="Port:"/>
+						<textbox id="proxy-i2p-port" type="number"/>
+					</row>
+				</rows>
+			</grid>
+			
+			</vbox>
+			
+		</tabpanel>
+		
 		<tabpanel id="settingsTab" flex="1">
-			<vbox flex="1">
+			<vbox flex="1" style='overflow: auto;'>
 	<hbox flex="1">
 
 		<tree id="notaryTree" onclick="onTreeSelected();" align="stretch" flex="1" editable="true">
@@ -47,14 +158,12 @@
 			</vbox>
 		</tabpanel>
 		<tabpanel id="advancedTab">
-			<vbox flex="0">
+			<vbox flex="0" style='overflow: auto;'>
 	<checkbox id="cache-certificates" label="Cache certificates locally." />
 	<checkbox id="notary-bounce" label="Anonymize communication with notaries." />
 	<checkbox id="connectivity-failure" label="Notary connectivity failure counts as authenticity failure."/>
 	<checkbox id="private-ip-exempt" label="Don't check RFC 1918 (private) IP addresses." />
 	<checkbox id="private-pki-exempt" label="Whitelist private PKI signatures." />
-	<checkbox id="namecoin-blockchain" label="Verify Namecoin (.bit) domains against the blockchain (requires namecoind and nmcontrol)." />
-	<checkbox id="namecoin-only" label="Only verify Namecoin (.bit) domains (other domains will revert to CA verification)." />
 
 	<groupbox>
 		<caption label="Verification Threshold"/>
@@ -73,7 +182,7 @@
 	</vbox>
 		</tabpanel>
 		<tabpanel id="cacheTab">
-			<vbox flex="1">
+			<vbox flex="1" style='overflow: auto;'>
 	<hbox flex="1">
 		<tree id="cacheTree" align="stretch" flex="1" editable="true" persist="sortDirection" sortDirection="natural">
 			<treecols>
@@ -100,9 +209,39 @@
 		</tabpanel>
 
 		<tabpanel id="exceptionsTab">
-			<vbox flex="1">
-				<description style="white-space: pre-wrap;">List of regexp patterns to match "host" part of an URL (e.g. "^.*\.google\.\w{1,3}$", can be a raw IP address - as entered) that should not be proxied through Convergence. One JS regexp per line.</description>
+			<vbox flex="1" style='overflow: auto;'>
+				<description style="white-space: pre-wrap;">List of regexp patterns to match "host" part of an URL (e.g. "^.*\.google\.\w{1,3}$", can be a raw IP address - as entered) that should not be proxied through FreeSpeechMe. One JS regexp per line.</description>
 				<textbox id="exceptions" flex="1" wrap="off" multiline="true" />
+			</vbox>
+		</tabpanel>
+		
+		<tabpanel id="aboutTab">
+			<vbox flex="1" style='overflow: auto;'>
+				<description style="white-space: pre-wrap;">FreeSpeechMe Plugin for Windows and Linux.
+From Viral Electron Chaos Laboratories.
+Website: <html:a class="url" href="http://www.freespeechme.org" target="_blank">http://www.freespeechme.org</html:a>
+				
+Credits:
+				
+Jeremy Rand: FreeSpeechMe Creator and Programmer
+Michael W. Dean: FreeSpeechMe Publicity, Beta Testing, Copywriting, Tech Tutorials, Cat Herding, Cheerleading
+				
+Appamatto and Aaron Swartz: BitDNS and SquareZooko proposals
+Moxie Marlinspike and Mike Kazantsev: Convergence
+phelix and the Namecoin Marketing and Development Fund: Supporting the TLS and Tor/I2P bounties
+itsnotlupus: Adding TLS to Dot-Bit specification
+khal: nmcontrol
+khal and vinced: namecoind
+
+Source code at <html:a class="url" href="https://github.com/namecoin/Convergence" target="_blank">https://github.com/namecoin/Convergence</html:a>.
+
+License:
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <html:a class="url" href="https://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">GNU General Public License for more details.</html:a>
+
+</description>
 			</vbox>
 		</tabpanel>
 

@@ -16,3 +16,28 @@ tree {min-height: 50px;}
 #down-button {
   list-style-image: url("chrome://convergence/content/images/down.gif");
 }
+
+#anon-warning {
+  border: red solid 3px; padding: 3px;
+}
+
+#anon-warning:not(.active-warning), #daemon-stop:not(.active-option) {
+  display: none;
+}
+
+#proxiesTab grid label {
+  margin-top: 10px;
+  margin-bottom: -10px;
+  
+}
+
+.url
+{
+    color: #0000ff;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.url:hover
+{
+    color: #ff0000;
+}

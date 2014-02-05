@@ -31,8 +31,22 @@ function SettingsManager() {
   this.connectivityIsFailureEnabled = true;
   this.privateIpExempt = true;
   this.privatePkiExempt = true;
+  this.namecoinResolve = true;
   this.namecoinBlockchain = true;
   this.namecoinOnly = true;
+  this.priority0 = "";
+  this.priority1 = "";
+  this.priority2 = "";
+  this.priority3 = "";
+  this.priority4 = "";
+  this.proxyTorProtocol = "";
+  this.proxyTorHost = "";
+  this.proxyTorPort = "";
+  this.proxyI2pProtocol = "";
+  this.proxyI2pHost = "";
+  this.proxyI2pPort = "";
+  this.daemonMode = "default";
+  this.daemonStop = true;
   this.maxNotaryQuorum = 3;
   this.whitelistPatterns = new PatternList();
   this.verificationThreshold = 'majority';
@@ -82,6 +96,14 @@ SettingsManager.prototype.getPrivatePkiExempt = function() {
   return this.privatePkiExempt;
 };
 
+SettingsManager.prototype.setNamecoinResolve = function(val) {
+  this.namecoinResolve = val;
+};
+
+SettingsManager.prototype.getNamecoinResolve = function() {
+  return this.namecoinResolve;
+};
+
 SettingsManager.prototype.setNamecoinBlockchain = function(val) {
   this.namecoinBlockchain = val;
 };
@@ -96,6 +118,110 @@ SettingsManager.prototype.setNamecoinOnly = function(val) {
 
 SettingsManager.prototype.getNamecoinOnly = function() {
   return this.namecoinOnly;
+};
+
+SettingsManager.prototype.setPriority0 = function(val) {
+  this.priority0 = val;
+};
+
+SettingsManager.prototype.getPriority0 = function() {
+  return this.priority0;
+};
+
+SettingsManager.prototype.setPriority1 = function(val) {
+  this.priority1 = val;
+};
+
+SettingsManager.prototype.getPriority1 = function() {
+  return this.priority1;
+};
+
+SettingsManager.prototype.setPriority2 = function(val) {
+  this.priority2 = val;
+};
+
+SettingsManager.prototype.getPriority2 = function() {
+  return this.priority2;
+};
+
+SettingsManager.prototype.setPriority3 = function(val) {
+  this.priority3 = val;
+};
+
+SettingsManager.prototype.getPriority3 = function() {
+  return this.priority3;
+};
+
+SettingsManager.prototype.setPriority4 = function(val) {
+  this.priority4 = val;
+};
+
+SettingsManager.prototype.getPriority4 = function() {
+  return this.priority4;
+};
+
+SettingsManager.prototype.setProxyTorProtocol = function(val) {
+  this.proxyTorProtocol = val;
+};
+
+SettingsManager.prototype.getProxyTorProtocol = function() {
+  return this.proxyTorProtocol;
+};
+
+SettingsManager.prototype.setProxyTorHost = function(val) {
+  this.proxyTorHost = val;
+};
+
+SettingsManager.prototype.getProxyTorHost = function() {
+  return this.proxyTorHost;
+};
+
+SettingsManager.prototype.setProxyTorPort = function(val) {
+  this.proxyTorPort = val;
+};
+
+SettingsManager.prototype.getProxyTorPort = function() {
+  return this.proxyTorPort;
+};
+
+SettingsManager.prototype.setProxyI2pProtocol = function(val) {
+  this.proxyI2pProtocol = val;
+};
+
+SettingsManager.prototype.getProxyI2pProtocol = function() {
+  return this.proxyI2pProtocol;
+};
+
+SettingsManager.prototype.setProxyI2pHost = function(val) {
+  this.proxyI2pHost = val;
+};
+
+SettingsManager.prototype.getProxyI2pHost = function() {
+  return this.proxyI2pHost;
+};
+
+SettingsManager.prototype.setProxyI2pPort = function(val) {
+  this.proxyI2pPort = val;
+};
+
+SettingsManager.prototype.getProxyI2pPort = function() {
+  return this.proxyI2pPort;
+};
+
+SettingsManager.prototype.setDaemonMode = function(val) {
+  this.daemonMode = val;
+};
+
+SettingsManager.prototype.getDaemonMode = function() {
+  return this.daemonMode;
+};
+
+SettingsManager.prototype.setDaemonStop = function(val) {
+  this.daemonStop = val;
+};
+
+SettingsManager.prototype.getDaemonStop = function() {
+  return this.daemonStop;
 };
 
 SettingsManager.prototype.setVerificationThreshold = function(val) {
@@ -183,8 +309,22 @@ SettingsManager.prototype.getSerializedSettings = function() {
     'verificationThreshold'        : this.verificationThreshold,
     'maxNotaryQuorum'              : this.maxNotaryQuorum,
     'privatePkiExempt'             : this.privatePkiExempt,
-	'namecoinBlockchain'           : this.namecoinBlockchain,
-	'namecoinOnly'                 : this.namecoinOnly,
+    'namecoinResolve'              : this.namecoinResolve,
+    'namecoinBlockchain'           : this.namecoinBlockchain,
+    'namecoinOnly'                 : this.namecoinOnly,
+    'priority0'                    : this.priority0,
+    'priority1'                    : this.priority1,
+    'priority2'                    : this.priority2,
+    'priority3'                    : this.priority3,
+    'priority4'                    : this.priority4,
+    'proxyTorProtocol'             : this.proxyTorProtocol,
+    'proxyTorHost'                 : this.proxyTorHost,
+    'proxyTorPort'                 : this.proxyTorPort,
+    'proxyI2pProtocol'             : this.proxyI2pProtocol,
+    'proxyI2pHost'                 : this.proxyI2pHost,
+    'proxyI2pPort'                 : this.proxyI2pPort,
+    'daemonMode'                   : this.daemonMode,
+    'daemonStop'                   : this.daemonStop,
     'whitelistPatterns'            : this.whitelistPatterns.source
   };
 };
@@ -276,8 +416,22 @@ SettingsManager.prototype.savePreferences = function() {
   rootElement.setAttribute('connectivity_failure', this.connectivityIsFailureEnabled);
   rootElement.setAttribute('private_pki_exempt', this.privatePkiExempt);
   rootElement.setAttribute('private_ip_exempt', this.privateIpExempt);
+  rootElement.setAttribute("namecoin_resolve", this.namecoinResolve);
   rootElement.setAttribute("namecoin_blockchain", this.namecoinBlockchain);
   rootElement.setAttribute("namecoin_only", this.namecoinOnly);
+  rootElement.setAttribute("priority0", this.priority0);
+  rootElement.setAttribute("priority1", this.priority1);
+  rootElement.setAttribute("priority2", this.priority2);
+  rootElement.setAttribute("priority3", this.priority3);
+  rootElement.setAttribute("priority4", this.priority4);
+  rootElement.setAttribute("proxyTorProtocol", this.proxyTorProtocol);
+  rootElement.setAttribute("proxyTorHost", this.proxyTorHost);
+  rootElement.setAttribute("proxyTorPort", this.proxyTorPort);
+  rootElement.setAttribute("proxyI2pProtocol", this.proxyI2pProtocol);
+  rootElement.setAttribute("proxyI2pHost", this.proxyI2pHost);
+  rootElement.setAttribute("proxyI2pPort", this.proxyI2pPort);
+  rootElement.setAttribute("daemonMode", this.daemonMode);
+  rootElement.setAttribute("daemonStop", this.daemonStop);
   rootElement.setAttribute('threshold', this.verificationThreshold);
   rootElement.setAttribute('max_notary_quorum', this.maxNotaryQuorum);
   rootElement.setAttribute('whitelist_patterns', escape(this.whitelistPatterns.source));
@@ -377,8 +531,22 @@ SettingsManager.prototype.loadPreferences = function() {
   this.connectivityIsFailureEnabled = (rootElement.item(0).getAttribute('connectivity_failure') == 'true');
   this.privateIpExempt = (rootElement.item(0).getAttribute('private_ip_exempt') == 'true');
   this.privatePkiExempt = (rootElement.item(0).getAttribute('private_pki_exempt') == 'true');
+  this.namecoinResolve = (rootElement.item(0).getAttribute("namecoin_resolve") == "true");
   this.namecoinBlockchain = (rootElement.item(0).getAttribute("namecoin_blockchain") == "true");
   this.namecoinOnly = (rootElement.item(0).getAttribute("namecoin_only") == "true");
+  this.priority0 = rootElement.item(0).getAttribute('priority0');
+  this.priority1 = rootElement.item(0).getAttribute('priority1');
+  this.priority2 = rootElement.item(0).getAttribute('priority2');
+  this.priority3 = rootElement.item(0).getAttribute('priority3');
+  this.priority4 = rootElement.item(0).getAttribute('priority4');
+  this.proxyTorProtocol = rootElement.item(0).getAttribute('proxyTorProtocol');
+  this.proxyTorHost = rootElement.item(0).getAttribute('proxyTorHost');
+  this.proxyTorPort = rootElement.item(0).getAttribute('proxyTorPort');
+  this.proxyI2pProtocol = rootElement.item(0).getAttribute('proxyI2pProtocol');
+  this.proxyI2pHost = rootElement.item(0).getAttribute('proxyI2pHost');
+  this.proxyI2pPort = rootElement.item(0).getAttribute('proxyI2pPort');
+  this.daemonMode = rootElement.item(0).getAttribute('daemonMode');
+  this.daemonStop = (rootElement.item(0).getAttribute("daemonStop") == "true");
   this.verificationThreshold = rootElement.item(0).getAttribute('threshold');
   this.maxNotaryQuorum = rootElement.item(0).getAttribute('max_notary_quorum');
   this.whitelistPatterns = new PatternList(unescape(rootElement.item(0).getAttribute('whitelist_patterns')));
@@ -403,13 +571,69 @@ SettingsManager.prototype.loadPreferences = function() {
   if (!rootElement.item(0).hasAttribute('private_ip_exempt')) {
     this.privateIpExempt = true;
   }
+
+  if (!rootElement.item(0).hasAttribute("namecoin_resolve")) {
+    this.namecoinResolve = true;
+  }
   
   if (!rootElement.item(0).hasAttribute("namecoin_blockchain")) {
-    this.namecoinBlockchain = false;
+    this.namecoinBlockchain = true;
   }
   
   if (!rootElement.item(0).hasAttribute("namecoin_only")) {
-    this.namecoinOnly = false;
+    this.namecoinOnly = true;
+  }
+
+  if (!rootElement.item(0).hasAttribute("priority0")) {
+    this.priority0 = "Ip4";
+  }
+
+  if (!rootElement.item(0).hasAttribute("priority1")) {
+    this.priority1 = "Ip6";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("priority2")) {
+    this.priority2 = "DontUse";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("priority3")) {
+    this.priority3 = "Tor";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("priority4")) {
+    this.priority4 = "I2p";
+  }
+
+  if (!rootElement.item(0).hasAttribute("proxyTorProtocol")) {
+    this.proxyTorProtocol = "socks";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyTorHost")) {
+    this.proxyTorHost = "127.0.0.1";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyTorPort")) {
+    this.proxyTorPort = 9050;
+  }
+
+  if (!rootElement.item(0).hasAttribute("proxyI2pProtocol")) {
+    this.proxyI2pProtocol = "socks";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyI2pHost")) {
+    this.proxyI2pHost = "127.0.0.1";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("proxyI2pPort")) {
+    this.proxyI2pPort = 4446;
+  }
+
+  if (!rootElement.item(0).hasAttribute("daemonMode")) {
+    this.daemonMode = "default";
+  }
+  
+  if (!rootElement.item(0).hasAttribute("daemonStop")) {
+    this.daemonStop = true;
   }
 
   if (!rootElement.item(0).hasAttribute('threshold')) {

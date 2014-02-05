@@ -7,14 +7,14 @@
     <r:Seq>
       <r:li>
         <r:Description>
-          <version>0.10</version>
+          <version>0.12</version>
           <targetApplication>
             <r:Description>
               <!-- Thunderbird -->
               <id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</id>
               <minVersion>3.0</minVersion>
               <maxVersion>99.*</maxVersion>
-              <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+              <updateLink>https://dot-bit.org/files/FreeSpeechMe.xpi</updateLink>
               <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
             </r:Description>
           </targetApplication>
@@ -24,7 +24,7 @@
               <id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</id>
               <minVersion>2.0</minVersion>
               <maxVersion>99.*</maxVersion>
-              <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+              <updateLink>https://dot-bit.org/files/FreeSpeechMe.xpi</updateLink>
               <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
             </r:Description>
           </targetApplication>
@@ -34,7 +34,7 @@
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>3.5</minVersion>
               <maxVersion>99.*</maxVersion>
-              <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+              <updateLink>https://dot-bit.org/files/FreeSpeechMe.xpi</updateLink>
               <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
             </r:Description>
           </targetApplication>
@@ -42,8 +42,8 @@
       </r:li>
     </r:Seq>
   </updates>
-  <version>0.10</version>
-  <updateLink>http://dot-bit.org/files/Convergence.xpi</updateLink>
+  <version>0.12</version>
+  <updateLink>https://dot-bit.org/files/FreeSpeechMe.xpi</updateLink>
   <updateHash>sha1:03007ca2feb7749b06927f47a99510ad5ea39af1</updateHash>
   <signature>
       MIIBEjALBgkqhkiG9w0BAQ0DggEBADmYWANGAmIt6O/wRvV3pydKa+S6svdY/ZBo

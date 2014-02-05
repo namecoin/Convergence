@@ -26,7 +26,6 @@ function NSPR() {
 }
 
 NSPR.initialize = function(nsprPath) {
-
   var sharedLib;
 
   try {
@@ -133,18 +132,6 @@ NSPR.initialize = function(nsprPath) {
 
     buffer : ctypes.ArrayType(ctypes.char),
     unsigned_buffer : ctypes.ArrayType(ctypes.unsigned_char),
-
-    // libc helper
-    inet_ntoa : sharedLib.declare('inet_ntoa',
-                                  ctypes.default_abi,
-                                  ctypes.char.ptr,
-                                  ctypes.uint32_t),
-
-    // libc helper
-    inet_aton : sharedLib.declare('inet_aton',
-                                  ctypes.default_abi,
-                                  ctypes.uint32_t,
-                                  ctypes.char.ptr),
 
     PR_NewTCPSocketPair : sharedLib.declare('PR_NewTCPSocketPair',
                                             ctypes.default_abi,
@@ -261,6 +248,13 @@ NSPR.initialize = function(nsprPath) {
                                 ctypes.uint16_t, // af
                                 ctypes.uint16_t, // port
                                 NSPR.types.PRNetAddr.ptr),
+
+    PR_NetAddrToString : sharedLib.declare('PR_NetAddrToString',
+                                  ctypes.default_abi,
+                                  ctypes.int,
+                                  NSPR.types.PRNetAddr.ptr,
+                                  ctypes.char.ptr,
+                                  ctypes.uint32_t),
 
     PR_GetHostByName : sharedLib.declare('PR_GetHostByName',
                                           ctypes.default_abi,

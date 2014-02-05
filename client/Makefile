@@ -1,5 +1,5 @@
 # Variables
-EXTENSION_NAME=Convergence
+EXTENSION_NAME=FreeSpeechMe
 XPI_NAME=$(EXTENSION_NAME).xpi
 ZIP_NAME=$(EXTENSION_NAME).zip
 
@@ -16,6 +16,8 @@ build: clean
 	zip -qr $(ZIP_NAME) ./chrome
 	zip -qr $(ZIP_NAME) ./chrome.manifest
 	zip -qr $(ZIP_NAME) ./components
+	zip -qr $(ZIP_NAME) ./daemons
+	zip -qr $(ZIP_NAME) ./defaults
 	zip -qr $(ZIP_NAME) ./style
 	zip -qr $(ZIP_NAME) ./install.rdf
 	zip -qr $(ZIP_NAME) ./icon.png

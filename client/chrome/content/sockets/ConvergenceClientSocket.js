@@ -34,41 +34,54 @@ function ConvergenceClientSocket(host, port, proxy, fd) {
     NSPR.lib.PR_AF_INET,
     NSPR.lib.PR_AI_ADDRCONFIG );
 
-  if (addrInfo == null || addrInfo.isNull())
+  if (addrInfo == null || addrInfo.isNull()) {
+    NSPR.lib.PR_FreeAddrInfo(addrInfo);
     throw 'DNS lookup failed: ' + NSPR.lib.PR_GetError() + '\n';
+  }
 
   var netAddressBuffer = NSPR.lib.PR_Malloc(1024);
   var netAddress = ctypes.cast(netAddressBuffer, NSPR.types.PRNetAddr.ptr);
+  var error;
 
-  NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
-  NSPR.lib.PR_SetNetAddr(
-    NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET,
-    proxy == null ? port : proxy.port, netAddress );
+  try {
+    NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
+    NSPR.lib.PR_SetNetAddr(
+      NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET,
+      proxy == null ? port : proxy.port, netAddress );
 
-  this.ip = NSPR.lib.inet_ntoa(netAddress.contents.ip).readString();
-  this.fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
+    var ip_buff = NSPR.lib.buffer(50);
+    var status = NSPR.lib.PR_NetAddrToString(netAddress, ip_buff, 50);
+    if (status != 0) throw 'Failed to get peer address';
+    this.ip = ip_buff.readString();
 
-  if (this.fd == null) throw 'Unable to construct socket!\n';
+    this.fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
+    if (this.fd == null) throw 'Unable to construct socket!\n';
 
-  var status = NSPR.lib.PR_Connect(this.fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
+    try {
+      status = NSPR.lib.PR_Connect(this.fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
 
-  if (status != 0) {
-    NSPR.lib.PR_Free(netAddressBuffer);
-    NSPR.lib.PR_FreeAddrInfo(addrInfo);
-    NSPR.lib.PR_Close(this.fd);
-    var err_code = NSPR.lib.PR_GetError(),
-      err_text = NSPR.lib.PR_ErrorToName(err_code).readString();
-    throw 'Failed to connect to ' + host + ' : ' + port + ' -- (' + err_code + ') ' + err_text;
-  }
+      if (status != 0) {
+        var err_code = NSPR.lib.PR_GetError(),
+          err_text = NSPR.lib.PR_ErrorToName(err_code).readString();
+        throw 'Failed to connect to ' + host + ' : ' + port + ' -- (' + err_code + ') ' + err_text;
+      }
 
-  if (proxy != null) {
-    CV9BLog.proto('Making proxied connection...');
-    var proxyConnector = new ProxyConnector(proxy);
-    proxyConnector.makeConnection(this, host, port);
-  }
+      if (proxy != null) {
+        CV9BLog.proto('Making proxied connection...');
+        var proxyConnector = new ProxyConnector(proxy);
+        proxyConnector.makeConnection(this, host, port);
+      }
+
+  // Make sure to close and free stuff here
+    } catch (e) {
+      NSPR.lib.PR_Close(this.fd);
+      throw e;
+    }
+  } catch (e) { error = e; }
 
   NSPR.lib.PR_Free(netAddressBuffer);
   NSPR.lib.PR_FreeAddrInfo(addrInfo);
+  if (error) throw error;
 
   this.host = host;
   this.port = port;
@@ -148,6 +161,27 @@ ConvergenceClientSocket.prototype.readString = function(n) {
 
   buffer[read] = 0;
   return buffer.readString();
+};
+
+ConvergenceClientSocket.prototype.readBuffer = function(n) {
+  if (n === null) n = 4095;
+  else if (n <= 0) return null;
+
+  var read, buffer = new NSPR.lib.buffer(n);
+
+  while (((read = NSPR.lib.PR_Read(this.fd, buffer, n)) == -1) &&
+      (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR)) {
+    CV9BLog.proto('polling on read...');
+    if (!this.waitForInput(8000)) return null; // TODO: hardcoded fail-timeout
+  }
+
+  if (read <= 0) {
+    CV9BLog.proto('Error read: ' + read + ' , ' + NSPR.lib.PR_GetError());
+    return null;
+  }
+
+  //buffer[read] = 0;
+  return buffer;
 };
 
 ConvergenceClientSocket.prototype.readFully = function(length) {

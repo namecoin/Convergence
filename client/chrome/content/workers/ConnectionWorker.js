@@ -87,13 +87,24 @@ function sanitiseFingerprint (fpr)
   dump ("Sanitised fingerprint: " + fpr + " -> " + res + "\n");
 
   return res;
-}
+};
 
-function getNamecoinFingerprint(host) {
+function getNamecoinDnsField(host, method, settings) {
+  
+    // Mostly adapted from ConvergenceClientSocket.js
 
-  // Mostly adapted from ConvergenceClientSocket.js
+  var nmcontrol_host;
+  var nmcontrol_port;
 
-  var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
+  if(settings['daemonMode'] == 'namecoind-nmcontrol') {
+    nmcontrol_host = "127.0.0.1";
+    nmcontrol_port = 18836;
+  } else {
+    nmcontrol_host = "127.0.0.1";
+    nmcontrol_port = 9000;
+  }
+
+  var addrInfo = NSPR.lib.PR_GetAddrInfoByName(nmcontrol_host, 
 					       NSPR.lib.PR_AF_INET, 
 					       NSPR.lib.PR_AI_ADDRCONFIG);
 
@@ -106,7 +117,7 @@ function getNamecoinFingerprint(host) {
 
   NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
   NSPR.lib.PR_SetNetAddr(NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET, 
-			 9000, netAddress);
+			 nmcontrol_port, netAddress);
   
   var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
 
@@ -131,7 +142,7 @@ function getNamecoinFingerprint(host) {
   
   // Fixed for new nmcontrol
   //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
-  var writeString = '{"params": ["getFingerprint", "' + host + '"], "method": "dns", "id": 1}'; 
+  var writeString = '{"params": ["' + method + '", "' + host + '"], "method": "dns", "id": 1}'; 
 
   NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
   
@@ -161,6 +172,126 @@ function getNamecoinFingerprint(host) {
   dump("domain data:\n" + domainData + "\n");
   
   domainData = JSON.parse(domainData);
+
+  return domainData;
+};
+
+function getNamecoinIp4(host, settings) {
+
+  var domainData = getNamecoinDnsField(host, "getIp4", settings);
+
+  // returns empty array when no IP found
+  if(! (domainData instanceof Array && ! domainData[0] ) ) {
+    dump("Found IPv4 address in blockchain.\n");
+    return domainData;
+  }
+  else {
+    dump("No IPv4 address in blockchain!\n");
+    return null;
+  }
+  
+};
+
+function getNamecoinIp6(host, settings) {
+
+  var domainData = getNamecoinDnsField(host, "getIp6", settings);
+
+  // returns empty array when no IP found
+  if(! (domainData instanceof Array && ! domainData[0] ) ) {
+    dump("Found IPv6 address in blockchain.\n");
+    return domainData;
+  }
+  else {
+    dump("No IPv6 address in blockchain!\n");
+    return null;
+  }
+  
+};
+
+function getNamecoinTor(host, settings) {
+
+  var domainData = getNamecoinDnsField(host, "getOnion", settings);
+
+  // returns empty array when no IP found
+  if(! (domainData instanceof Array && ! domainData[0] ) ) {
+    dump("Found Tor address in blockchain.\n");
+    return domainData;
+  }
+  else {
+    dump("No Tor address in blockchain!\n");
+    return null;
+  }
+  
+};
+
+function getNamecoinI2p(host, settings) {
+
+  var domainData = getNamecoinDnsField(host, "getI2p_b32", settings);
+
+  // returns empty array when no IP found
+  if(! (domainData instanceof Array && ! domainData[0] ) ) {
+    dump("Found I2P address in blockchain.\n");
+    return domainData;
+  }
+  else {
+    dump("No I2P address in blockchain!\n");
+    return null;
+  }
+  
+};
+
+var namecoinResolvers = {"Ip4": getNamecoinIp4, "Ip6": getNamecoinIp6, "Tor": getNamecoinTor, "I2p": getNamecoinI2p, "DontUse": function(){return null;}};
+
+function getNamecoinResolution(host, settings) {
+  
+  var resolvedData;
+  var giveUp = false;
+  var ns = false;
+  var unsupportedResolver = "";
+  
+  for(var priority=0; priority <= 4; priority++)
+  {
+    // If this is true, then we're looking at resolvers that the user hasn't authorized
+    if(settings['priority'+priority] == "DontUse") giveUp = true;
+    
+    dump("Checking resolver " + settings['priority'+priority] + "\n");
+    
+    // Resolve the domain using the currently iterated resolver
+    resolvedData = namecoinResolvers[settings['priority'+priority]](host, settings);
+    
+    // Check if nmcontrol is complaining about "ns"
+    if (resolvedData instanceof Array && resolvedData[0] && resolvedData.indexOf("ns")>=0) {
+      ns = true;
+      continue;
+    }
+    
+    // If we found something... 
+    if (resolvedData instanceof Array && resolvedData[0] ) {
+      
+      // if the resolver is authorized, return it
+      if(! giveUp) return resolvedData;
+      
+      // if the resolver is unauthorized, log an error
+      unsupportedResolver = unsupportedResolver + ", " + settings['priority'+priority];
+    }
+  }
+  
+  var errorMessage = "";
+  
+  if(ns) errorMessage = errorMessage + "The requested domain " + host + " would bypass the Namecoin blockchain.  " ;
+  if(unsupportedResolver !== "") errorMessage = errorMessage + "The following domain resolvers are disabled: " + unsupportedResolver.slice(2) + ".  ";
+  
+  if(!ns && unsupportedResolver === "") errorMessage = errorMessage + "No resolvable address was found for the requested domain " + host + ".  ";
+  
+  throw errorMessage;
+  
+  return null;
+  
+};
+
+function getNamecoinFingerprint(host, settings) {
+
+  var domainData = getNamecoinDnsField(host, "getFingerprint", settings);
   
   // returns empty array when no fingerprint found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -178,11 +309,11 @@ function getNamecoinFingerprint(host) {
     return null;
   }
   
-}
+};
 
 function checkCertificateValidity(
   certificateCache, activeNotaries, host, port, ip,
-  certificateInfo, privatePkiExempt, namecoinBlockchain)
+  certificateInfo, privatePkiExempt, namecoinBlockchain, settings)
 {
   var target = host + ':' + port;
 
@@ -211,7 +342,7 @@ function checkCertificateValidity(
   if(namecoinBlockchain && host.substr(-4) == ".bit") {
     dump("Checking Namecoin blockchain...\n");
 	
-	var namecoinFingerprints = getNamecoinFingerprint (host);
+	var namecoinFingerprints = getNamecoinFingerprint (host, settings);
         var wantedFingerprint = sanitiseFingerprint (certificateInfo.sha1);
 	
 	if (namecoinFingerprints instanceof Array
@@ -274,119 +405,18 @@ onmessage = function(event) {
 	var resolvedHost = destination.host;
 	
 	// Check for .bit
-	if(destination.host.substr(-4) == ".bit") {
+	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit") {
 	  dump("Resolving .bit host " + destination.host + ":" + (destination.port) + "...\n");
 	
       try {
-    
-      // Mostly adapted from ConvergenceClientSocket.js
-      
-      var addrInfo = NSPR.lib.PR_GetAddrInfoByName("127.0.0.1", 
-					       NSPR.lib.PR_AF_INET, 
-					       NSPR.lib.PR_AI_ADDRCONFIG);
-      
-      dump("addrInfo initialized\n");
-
-      if (addrInfo == null || addrInfo.isNull()) {
-        throw "DNS lookup failed: " + NSPR.lib.PR_GetError() + "\n";
-      }
-      
-      var netAddressBuffer = NSPR.lib.PR_Malloc(1024);
-      var netAddress       = ctypes.cast(netAddressBuffer, NSPR.types.PRNetAddr.ptr);
-      
-      NSPR.lib.PR_EnumerateAddrInfo(null, addrInfo, 0, netAddress);
-      NSPR.lib.PR_SetNetAddr(NSPR.lib.PR_IpAddrNull, NSPR.lib.PR_AF_INET, 
-			 9000, netAddress);
         
-      var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
-
-      dump("fd initialized\n");
-      
-      if (fd == null) {
-        throw "Unable to construct socket!\n";
-      }
+        var domainData = getNamecoinResolution(destination.host, event.data.settings);
+      	
+        var resolved = domainData[0]; // ToDo: round-robin balancing
+	
+        dump("Resolved record: " + resolved + "\n");
         
-      var status = NSPR.lib.PR_Connect(fd, netAddress, NSPR.lib.PR_SecondsToInterval(5));
-      
-      dump("status initialized\n");
-
-      if (status != 0) {
-        NSPR.lib.PR_Free(netAddressBuffer);
-        NSPR.lib.PR_FreeAddrInfo(addrInfo);
-        NSPR.lib.PR_Close(fd);
-        throw "Failed to connect to nmcontrol" + " -- " + NSPR.lib.PR_GetError();
-      }
-        
-      NSPR.lib.PR_Free(netAddressBuffer);
-      NSPR.lib.PR_FreeAddrInfo(addrInfo);
-      
-      dump("PR_Free called\n");
-
-      // Not needed with new nmcontrol  
-      //var hostSplit = destination.host.split(".").reverse();
-      
-      // Fixed for new nmcontrol
-      //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
-      var writeString = '{"params": ["getIp4", "' + destination.host + '"], "method": "dns", "id": 1}'; 
-      
-      dump("writeString initialized\n");
-
-      NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
-        
-      dump("PR_Write called\n");
-
-      var buffer = new NSPR.lib.buffer(4096);
-      var read;
-      
-      while (((read = NSPR.lib.PR_Read(fd, buffer, 4095)) == -1) && 
-	    (NSPR.lib.PR_GetError() == NSPR.lib.PR_WOULD_BLOCK_ERROR))
-      {
-        dump("polling on read...\n");
-        if (!waitForInput2(fd, -1))
-          return null;
-      }
-      
-      dump("PR_Read finished\n");
-
-      if (read <= 0) {
-        dump("Error read: " + read + " , " + NSPR.lib.PR_GetError() + "\n");
-        return null;
-      }
-      
-      buffer[read] = 0;
-      var resultString = buffer.readString();
-        
-      dump("nmcontrol returned:\n" + resultString + "\n");
-        
-      var domainData = JSON.parse(resultString)["result"]["reply"];
-        
-      dump("domain data:\n" + domainData + "\n");
-        
-      domainData = JSON.parse(domainData);
-      		
-      var ipv4 = null;
-	  
-          // returns empty array when no IP found
-	  if (domainData instanceof Array && domainData[0]) {
-
-            // nmcontrol returns the string "ns" when its security policy blocked an external DNS lookup
-            if(domainData[0] == "ns") {
-              throw "The requested domain " + destination.host + " would bypass the Namecoin blockchain";
-            }
-            
-	    ipv4 = domainData[0]; // ToDo: round-robin balancing
-	  }
-          else {
-            //ipv4 = "0.0.0.0"
-            throw "No IPv4 address was found for the requested domain " + destination.host;
-          }
-	  
-	  if(ipv4 != null)
-      {
-		dump("IPv4 record: " + ipv4 + "\n");
-		
-		resolvedHost = ipv4;
-      }
+        resolvedHost = resolved;
 
         } catch(e) {
 
@@ -405,12 +435,35 @@ onmessage = function(event) {
 	  dump("ConnectionWorker non-Namecoin host '" + destination.host + "'\n");
 	}
 	
+	var new_proxy = event.data.proxy;
+	
+	// ToDo: nest the below if statements
+	// ToDo: move the proxy settings into GUI config
+	
+	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit" && resolvedHost.substr(-6) == ".onion") {
+	  
+          new_proxy = {
+            'host' : event.data.settings['proxyTorHost'],
+            'port' : event.data.settings['proxyTorPort'],
+            'type' : event.data.settings['proxyTorProtocol'] };
+	}
+	
+	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit" && resolvedHost.substr(-4) == ".i2p") {
+	  
+          new_proxy = {
+            'host' : event.data.settings['proxyI2pHost'],
+            'port' : event.data.settings['proxyI2pPort'],
+            'type' : event.data.settings['proxyI2pProtocol'] };
+	}
+	
 	dump("ConnectionWorker connecting client socket to " + resolvedHost + ":" + destination.port + "\n");
+	
+	
 	
     //targetSocket           = new ConvergenceClientSocket(destination.host, 
 	targetSocket           = new ConvergenceClientSocket(resolvedHost, 
 							 destination.port, 
-							 event.data.proxy);
+							 new_proxy);
 
     if(! destination.passThroughHeaders) {
 
@@ -423,7 +476,7 @@ onmessage = function(event) {
 
     var results = this.checkCertificateValidity(certificateCache, activeNotaries,
 						destination.host, destination.port, targetSocket.ip,
-						certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain']);
+						certificateInfo, event.data.settings['privatePkiExempt'], event.data.settings['namecoinBlockchain'], event.data.settings);
 
     CV9BLog.worker_conn('Validity check results:', results);
 
