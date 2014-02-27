@@ -28,6 +28,10 @@ Website Administrators should place the SHA-1 fingerprint of their website in th
 
 TLS is typically not used with Tor/I2P (unless Whonix is being used), but should work (not tested).  Be aware that the Host header sent by your visitors will be the .bit address, not the .onion or .b32.i2p address.  Example configurations are at d/federalistpapers (Tor) and d/anonymous-git-hosting (I2P).
 
+## Building
+
+Place Windows and Linux versions of namecoind and nmcontrol in the corresponding subfolders of the daemons folder.  (You can skip this step, but obviously it will then require the user to install namecoind and nmcontrol themselves).  Then run "make".  Easy, right?
+
 ## Known Bugs
 
 1. In extremely rare cases, some .bit websites might not load; this is because nmcontrol doesn't yet support the entire .bit specification.  (Placing bounties might improve this situation.)  However, almost all major .bit websites should now be supported if using the nmcontrol linked above.
