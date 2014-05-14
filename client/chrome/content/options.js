@@ -782,7 +782,7 @@ function checkNamecoind() {
          * @param p the params to send the method
          * @param extra an extra argument, used to hold the address if it's from a selection
          * @return a JSON object containing the response from bitcoin
-         */1883
+         */
         function sendRequest(m, p, extra, callback) {
                 var http = new XMLHttpRequest();
                 var url = "http://convergence:convergence@127.0.0.1:18835/";
