@@ -5,7 +5,7 @@
 	title="FreeSpeechMe Preferences"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	width="620" height="450" buttons="accept,cancel" onload="onOptionsLoad();"
+	width="620" height="600" buttons="accept,cancel" onload="onOptionsLoad();"
 	ondialogaccept="return onOptionsSave();">
 
 <script src="Logger.js"/>
@@ -39,12 +39,15 @@
 				<menulist id="daemon-mode" oncommand="daemonModeCommand();">
 					<menupopup>
 						<menuitem label="I already have nmcontrol on the default port." value="default"/>
-						<menuitem label="I don't have namecoind or nmcontrol; use the bundled versions." value="namecoind-nmcontrol"/>
+						<menuitem label="I don't have namecoind or nmcontrol; start bundled versions when Firefox is started." value="namecoind-nmcontrol"/>
 						<menuitem label="I want to use a custom nmcontrol installation." value="custom"/>
 					</menupopup>
 				</menulist>
 				
 				<checkbox id="daemon-stop" label="Stop bundled namecoind and nmcontrol when exiting Firefox." />
+				
+				<label value="namecoind/nmcontrol settings will be applied when you restart Firefox.  Or, you can:"/>
+				<button id="daemon-apply" label="Apply namecoind/nmcontrol settings now" onclick="applyDaemonsNow();"/>
 							
 				<separator />
 				
@@ -75,6 +78,7 @@
 
 		<tabpanel id="statusTab">
 			<vbox flex="1" style='overflow: auto;'>
+				<button id="namecoind-refresh" label="Refresh namecoind Status" oncommand="checkNamecoind();" />
 				<description>Output from namecoind:</description>
 				<textbox id="namecoind-output" readonly="true" flex="1" multiline="true" value="Loading..."/>
 			</vbox>
