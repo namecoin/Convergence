@@ -1,0 +1,19 @@
+<!ENTITY title                 "FreeSpeechMe-Standalone">
+
+<!ENTITY file.label            "File">
+<!ENTITY filePageSetup.label   "Page Setup">
+<!ENTITY filePrint.label       "Print">
+<!ENTITY filePrint.accesskey   "P">
+<!ENTITY filePrint.key         "P">
+<!ENTITY fileExit.label        "Exit">
+
+<!ENTITY edit.label            "Edit">
+<!ENTITY editCopy.label        "Copy">
+<!ENTITY editCopy.key          "C">
+<!ENTITY editSelectAll.label   "Select All">
+<!ENTITY editSelectAll.key     "A">
+
+
+
+
+

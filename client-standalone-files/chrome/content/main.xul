@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://convergence/skin/main.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://convergence/locale/main.dtd">
+
+<window id="main" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="&title;" style="width: 700px; height: 500px;" persist="screenX screenY width height sizemode">
+
+	<script src="Logger.js"/>
+	<script src="ConvergenceResponseStatus.js"/>
+	<script src="CertificateStatus.js"/>
+	<script src="ctypes/NSS.js" />
+	<script src="convergence.js"/>
+
+  <commandset id="cmdset_file">
+    <command id="cmd_pageSetup" label="&filePageSetup.label;" oncommand="CommandUpdater.doCommand(this.id);"/>
+    <command id="cmd_print" label="&filePrint.label;" oncommand="CommandUpdater.doCommand(this.id);"/>
+    <command id="cmd_exit" label="&fileExit.label;" oncommand="CommandUpdater.doCommand(this.id);"/>
+  </commandset>
+
+  <commandset id="cmdset_edit">
+    <command id="cmd_copy" label="&editCopy.label;" oncommand="CommandUpdater.doCommand(this.id);"/>
+    <command id="cmd_selectAll" label="&editSelectAll.label;" oncommand="CommandUpdater.doCommand(this.id);"/>
+  </commandset>
+
+
+  <keyset id="keyset_main">
+    <key id="key_copy" key="&editCopy.key;" modifiers="accel" command="cmd_copy"/>
+    <key id="key_selectAll" key="&editSelectAll.key;" modifiers="accel" command="cmd_selectAll"/>
+    <key id="key_print" key="&filePrint.key;" modifiers="accel" command="cmd_print"/>
+  </keyset>
+
+
+  <toolbox>
+    <toolbar id="freespeechme-toolbar" mode="icons">
+	<toolbarbutton id="convergence-button" class="toolbarbutton-1"
+		type="menu-button" autoCheck="false"
+		label="Convergence!" tooltiptext="Toggle!"
+		oncommand="Convergence.onToolBarClick(event);">
+
+		<menupopup>
+			<menuitem label="Disable" id="convergence-menu-toggle"/>
+			<menuitem label="Options"
+				oncommand="window.openDialog('chrome://convergence/content/options.xul', 'dialog', 'modal');"/>
+		</menupopup>
+
+	</toolbarbutton>
+    </toolbar>
+  </toolbox>
+  <hbox id="main_box" flex="1">
+    <vbox id="workspace_box" flex="1">
+      <label id="proxy_instructions">Set your web browser to HTTP+HTTPS proxy localhost:18833.</label>
+      <label id="options_instructions">Click the button above to enable/disable the FreeSpeechMe proxy and/or change settings.</label>
+    </vbox>
+  </hbox>
+</window>

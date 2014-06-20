@@ -466,7 +466,18 @@ onmessage = function(event) {
 							 new_proxy);
 
     if(! destination.passThroughHeaders) {
-
+    
+    // If not a Namecoin domain, don't try to MITM it
+    if(event.data.settings['namecoinOnly'] && destination.host.substr(-4) != ".bit") {
+      dump("Skipping MITM...\n");
+      localSocket.writeBytes(NSPR.lib.buffer('HTTP/1.0 200 Connection established\r\n\r\n'), 39);
+      postMessage({'clientFd' : Serialization.serializePointer(localSocket.fd), 
+    	           'serverFd' : Serialization.serializePointer(targetSocket.fd)});
+      
+      dump("Standard TLS launched.\n");
+    }
+    else {
+    
     var certificate        = targetSocket.negotiateSSL();
     var certificateInfo    = new CertificateInfo(certificate);
     var certificateCache   = new NativeCertificateCache(event.data.cacheFile, 
@@ -495,6 +506,7 @@ onmessage = function(event) {
       'serverFd' : Serialization.serializePointer(targetSocket.fd) });
     certificateCache.close();
 
+    }
     }
     else {
       targetSocket.writeBytes(NSPR.lib.buffer(destination.passThroughHeaders), destination.passThroughHeaders.length);

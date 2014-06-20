@@ -1,0 +1,13 @@
+content        convergence       chrome/content/
+skin           convergence       classic/1.0       chrome/skin/
+locale         convergence       en-US             chrome/locale/en-US/
+
+style chrome://convergence/content/main.xul chrome://convergence/style/toolbar.css
+
+category content-policy ConvergenceContentPolicy @fraggod.net/convergence-contentpolicy;1
+
+component {b2e4ed6b-0c15-4a4b-9b40-f0324e938378} components/ConvergenceContentPolicy.js
+contract @fraggod.net/convergence-contentpolicy;1 {b2e4ed6b-0c15-4a4b-9b40-f0324e938378}
+
+component {44d8bf5b-d0f8-4e2a-876d-5df3813a56c6} components/Convergence.js
+contract @fraggod.net/convergence;1 {44d8bf5b-d0f8-4e2a-876d-5df3813a56c6}
