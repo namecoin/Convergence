@@ -33,7 +33,7 @@ FreeSpeechMe is a product of Viral Electron Chaos Laboratories (VECLabs).
 9. Click the Convergence icon to turn it green.
 10. Set your favorite browser to use the proxy settings which are in the main FreeSpeechMe-Standalone window.
 11. Close FreeSpeechMe-Standalone.
-12. Import the Convergence Certificate Authority into your browser.  On Linux, this can hopefully be accomplished by going to the "client-standalone-build" directory, and running the "install_tls.sh" script in a terminal.  Windows may be similar, please experiment and report back.
+12. Import the Convergence Certificate Authority into your browser.  On Linux, this can hopefully be accomplished by going to the FreeSpeechMe-Standalone profile directory, and running the "install_tls.sh" script from the "client-standalone-build" in a terminal.  Windows may be similar, please experiment and report back.
 13. Reopen FreeSpeechMe-Standalone.
 14. You might need to restart your browser for the Certificate Authority to take effect.
 15. Look for bugs, report them, and send in pull requests.
