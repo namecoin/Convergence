@@ -4,7 +4,7 @@ FreeSpeechMe is a modification to Moxie Marlinspike's tool Convergence, modified
 
 FreeSpeechMe is a product of Viral Electron Chaos Laboratories (VECLabs).
 
-## End-User Installation
+## End-User Installation (Firefox Extension)
 
 1. (OPTIONAL) Install namecoind and nmcontrol as per their documentation, and ensure that they are both running.
 2. Install the XPI into Firefox.
@@ -17,6 +17,26 @@ FreeSpeechMe is a product of Viral Electron Chaos Laboratories (VECLabs).
 9. Click the Convergence icon to turn it green.
 10. If you're using the bundled namecoind and nmcontrol, wait about 3-5 hours for the blockchain to download.  You can still browse non-.bit sites in the meantime.
 11. That's it!  You can safely browse .bit websites without relying on third-party DNS, and .bit HTTPS websites will automatically have their certificates verified.
+
+## End-User Installation (Standalone Application)
+
+**WARNING: The standalone version is still being developed, and is not ready for general use yet.  Please test it and report bugs, but don't get mad when you find a lot of them.**
+
+1. (REQUIRED) Install namecoind and nmcontrol as per their documentation, and ensure that they are both running.  (The Standalone version does not yet support bundled daemons.)
+2. Install XULRunner.  For Linux, this is available via your package manager.  For Windows, download it here: https://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/latest/runtimes/
+3. From a command line, go to the "client-standalone-build" directory, and run the following (include the full path to xulrunner.exe if you're on Windows): xulrunner application.ini
+4. In the window that launches, there will be a Convergence icon in the toolbar.  Click its dropdown menu and choose Options.
+5. On the Namecoin tab, make sure that "Verify Namecoin (.bit) domains" and "Only verify Namecoin (.bit) domains" are both checked.
+6. Don't choose the bundled namecoind/nmcontrol; they don't work yet.
+7. (OPTIONAL) On the Namecoin tab, increase the priorities of resolvers that you want to use (e.g. IPv6, Tor, and I2P).  On the Proxies tab, enter your SOCKS proxy settings for Tor and I2P domains if you want to use those resolvers.
+8. Click OK.
+9. Click the Convergence icon to turn it green.
+10. Set your favorite browser to use the proxy settings which are in the main FreeSpeechMe-Standalone window.
+11. Close FreeSpeechMe-Standalone.
+12. Import the Convergence Certificate Authority into your browser.  On Linux, this can hopefully be accomplished by going to the FreeSpeechMe-Standalone profile directory, and running the "install_tls.sh" script from the "client-standalone-build" in a terminal.  Windows may be similar, please experiment and report back.
+13. Reopen FreeSpeechMe-Standalone.
+14. You might need to restart your browser for the Certificate Authority to take effect.
+15. Look for bugs, report them, and send in pull requests.
 
 ## Website Administrators
 
