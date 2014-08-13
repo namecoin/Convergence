@@ -24,7 +24,7 @@ FreeSpeechMe is a product of Viral Electron Chaos Laboratories (VECLabs).
 
 1. (REQUIRED) Install namecoind and nmcontrol as per their documentation, and ensure that they are both running.  (The Standalone version does not yet support bundled daemons.)
 2. Install XULRunner.  For Linux, this is available via your package manager.  For Windows, download it here: https://ftp.mozilla.org/pub/mozilla.org/xulrunner/releases/latest/runtimes/
-3. From a command line, go to the "client-standalone-build" directory, and run the following (include the full path to xulrunner.exe if you're on Windows): xulrunner application.ini
+3. From a command line, go to the "client-standalone-build" directory (this directory is created when you build; see below), and run the following (include the full path to xulrunner.exe if you're on Windows): xulrunner application.ini
 4. In the window that launches, there will be a Convergence icon in the toolbar.  Click its dropdown menu and choose Options.
 5. On the Namecoin tab, make sure that "Verify Namecoin (.bit) domains" and "Only verify Namecoin (.bit) domains" are both checked.
 6. Don't choose the bundled namecoind/nmcontrol; they don't work yet.
@@ -33,7 +33,7 @@ FreeSpeechMe is a product of Viral Electron Chaos Laboratories (VECLabs).
 9. Click the Convergence icon to turn it green.
 10. Set your favorite browser to use the proxy settings which are in the main FreeSpeechMe-Standalone window.
 11. Close FreeSpeechMe-Standalone.
-12. Import the Convergence Certificate Authority into your browser.  On Linux, this can hopefully be accomplished by going to the FreeSpeechMe-Standalone profile directory, and running the "install_tls.sh" script from the "client-standalone-build" in a terminal.  Windows may be similar, please experiment and report back.
+12. Import the Convergence Certificate Authority into your browser.  On Ubuntu and Fedora, install scripts are provided: install_tls_ubuntu.sh and install_tls_fedora.sh.  Windows may be similar, please experiment and report back.
 13. Reopen FreeSpeechMe-Standalone.
 14. You might need to restart your browser for the Certificate Authority to take effect.
 15. Look for bugs, report them, and send in pull requests.
@@ -46,7 +46,7 @@ Website Administrators should place the SHA-1 fingerprint of their website in th
 
 ### Tor/I2P
 
-TLS is typically not used with Tor/I2P (unless Whonix is being used), but should work (not tested).  Be aware that the Host header sent by your visitors will be the .bit address, not the .onion or .b32.i2p address.  Example configurations are at d/federalistpapers (Tor) and d/anonymous-git-hosting (I2P).
+TLS is typically not used with Tor/I2P (unless Whonix is being used), but should work (not tested).  Be aware that the Host header sent by your visitors will be the .bit address, not the .onion or .b32.i2p address.  Example configurations are at d/federalistpapers (Tor) and d/anonymous-git-hosting (I2P).  UPDATE: TLS with Tor/I2P is broken due to an SNI issue.  Thanks to domob for reporting it.
 
 ## Building
 
