@@ -33,7 +33,7 @@ FreeSpeechMe is a product of Viral Electron Chaos Laboratories (VECLabs).
 9. Click the Convergence icon to turn it green.
 10. Set your favorite browser to use the proxy settings which are in the main FreeSpeechMe-Standalone window.
 11. Close FreeSpeechMe-Standalone.
-12. Import the Convergence Certificate Authority into your browser.  On Ubuntu and Fedora, install scripts are provided: install_tls_ubuntu.sh and install_tls_fedora.sh.  Windows may be similar, please experiment and report back.
+12. Import the Convergence Certificate Authority into your browser.  On Fedora, Ubuntu, and Windows, install scripts are provided: install_tls_fedora.sh, install_tls_ubuntu.sh and install_tls_windows.bat.  Note that the Windows script needs the NSS-Tools binaries, which aren't included here.  If you're in a hurry and are okay with using outdated versions (at your own risk!), you can download http://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_3_11_4_RTM/msvc6.0/WINNT5.0_OPT.OBJ/nss-3.11.4.zip and http://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v4.6.4/msvc6.0/WINNT5.0_OPT.OBJ/nspr-4.6.4.zip , and then copy the contents of the "bin" and "lib" directories of both zips to a new directory "win-nss" inside "client-standalone-build".
 13. Reopen FreeSpeechMe-Standalone.
 14. You might need to restart your browser for the Certificate Authority to take effect.
 15. Look for bugs, report them, and send in pull requests.
