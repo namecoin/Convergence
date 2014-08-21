@@ -52,6 +52,7 @@
     <vbox id="workspace_box" flex="1">
       <label id="proxy_instructions">Set your web browser to HTTP+HTTPS proxy localhost:18833.</label>
       <label id="options_instructions">Click the button above to enable/disable the FreeSpeechMe proxy and/or change settings.</label>
+      <label id="https_troubleshooting_instructions" style="padding-top: 100px;">Are you getting HTTPS/SSL/TLS errors?  Close your web browser and FreeSpeechMe-Standalone and then run the provided TLS installation script for your OS.  (On Windows, you have to run the script as an Administrator.)</label>
     </vbox>
   </hbox>
 </window>
