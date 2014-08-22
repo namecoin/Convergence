@@ -50,7 +50,7 @@ TLS is typically not used with Tor/I2P (unless Whonix is being used), but should
 
 ## Building
 
-Place Windows and Linux versions of namecoind and nmcontrol in the corresponding subfolders of the daemons folder.  (You can skip this step, but obviously it will then require the user to install namecoind and nmcontrol themselves).  Then run "make".  Easy, right?
+Place Windows and Linux versions of namecoind and nmcontrol in the corresponding subfolders of the daemons folder.  (You can skip this step, but obviously it will then require the user to install namecoind and nmcontrol themselves).  Then run "make" from the "client" directory.  Easy, right?
 
 ## Known Bugs
 
