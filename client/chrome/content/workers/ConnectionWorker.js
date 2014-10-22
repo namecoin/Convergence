@@ -56,11 +56,23 @@ importScripts(
   'chrome://convergence/content/ssl/CertificateManager.js',
   'chrome://convergence/content/ConvergenceResponseStatus.js' );
 
+/**
+ *
+ * @param localSocket
+ * @param certificateManager
+ * @param certificateInfo
+ */
 function sendClientResponse(localSocket, certificateManager, certificateInfo) {
   localSocket.writeBytes(NSPR.lib.buffer('HTTP/1.0 200 Connection established\r\n\r\n'), 39);
   localSocket.negotiateSSL(certificateManager, certificateInfo);
-};
+}
 
+/**
+ *
+ * @param fd
+ * @param timeoutMillis
+ * @returns {boolean}
+ */
 function waitForInput2(fd, timeoutMillis) {
   var pollfds_t	= ctypes.ArrayType(NSPR.types.PRPollDesc);
   var pollfds	  = new pollfds_t(1);
@@ -69,17 +81,24 @@ function waitForInput2(fd, timeoutMillis) {
   pollfds[0].out_flags = 0;
 
   var status = NSPR.lib.PR_Poll(pollfds, 1, timeoutMillis);
-  
+
+  //simplify to return ()
   if (status == -1 || status == 0) {
     return false;
   }
 
   return true;
-};
+}
 
+/**
+ * Mostly adapted from ConvergenceClientSocket.js
+ * @param host
+ * @param method
+ * @param params
+ * @param settings
+ * @returns {*}
+ */
 function getNamecoinDnsField(host, method, params, settings) {
-  
-    // Mostly adapted from ConvergenceClientSocket.js
 
   var nmcontrol_host;
   var nmcontrol_port;
@@ -165,8 +184,14 @@ function getNamecoinDnsField(host, method, params, settings) {
   domainData = JSON.parse(domainData);
 
   return domainData;
-};
+}
 
+/**
+ * Opens a TCP connection to NMControl to retrieve data
+ * @param host
+ * @param settings
+ * @returns {*}
+ */
 function getNamecoinIp4(host, settings) {
 
   var domainData = getNamecoinDnsField(host, "getIp4", [], settings);
@@ -181,7 +206,8 @@ function getNamecoinIp4(host, settings) {
     return null;
   }
   
-};
+}
+
 
 function getNamecoinIp6(host, settings) {
 
@@ -197,7 +223,7 @@ function getNamecoinIp6(host, settings) {
     return null;
   }
   
-};
+}
 
 function getNamecoinTor(host, settings) {
 
@@ -213,7 +239,7 @@ function getNamecoinTor(host, settings) {
     return null;
   }
   
-};
+}
 
 function getNamecoinI2p(host, settings) {
 
@@ -229,10 +255,24 @@ function getNamecoinI2p(host, settings) {
     return null;
   }
   
-};
+}
 
-var namecoinResolvers = {"Ip4": getNamecoinIp4, "Ip6": getNamecoinIp6, "Tor": getNamecoinTor, "I2p": getNamecoinI2p, "DontUse": function(){return null;}};
+//string<->func
+var namecoinResolvers = {
+  "Ip4": getNamecoinIp4,
+  "Ip6": getNamecoinIp6,
+  "Tor": getNamecoinTor,
+  "I2p": getNamecoinI2p,
+  "DontUse": function(){
+    return null;
+  }};
 
+/**
+ * Asks NMControl for all supported resolvers & picks the best one
+ * @param host
+ * @param settings
+ * @returns {*}
+ */
 function getNamecoinResolution(host, settings) {
   
   var resolvedData;
@@ -276,10 +316,23 @@ function getNamecoinResolution(host, settings) {
   
   throw errorMessage;
   
-  return null;
+  return null; //unreachable?
   
-};
+}
 
+/**
+ *
+ * @param certificateCache
+ * @param activeNotaries
+ * @param host
+ * @param port
+ * @param ip
+ * @param certificateInfo
+ * @param privatePkiExempt
+ * @param namecoinBlockchain
+ * @param settings
+ * @returns {*}
+ */
 function checkCertificateValidity(
   certificateCache, activeNotaries, host, port, ip,
   certificateInfo, privatePkiExempt, namecoinBlockchain, settings)
@@ -351,8 +404,12 @@ function checkCertificateValidity(
   } else {
     return results;
   }
-};
+}
 
+/**
+ * Main method
+ * @param event
+ */
 onmessage = function(event) {
   var localSocket = null;
   var targetSocket = null;
@@ -374,11 +431,13 @@ onmessage = function(event) {
 	var resolvedHost = destination.host;
 	
 	// Check for .bit
+    //use (NMControl) for DNS and just check using add-on?
 	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit") {
 	  dump("Resolving .bit host " + destination.host + ":" + (destination.port) + "...\n");
 	
       try {
-	
+
+	//Get best resolver
 	var domainData = getNamecoinResolution(destination.host, event.data.settings);
       	
 	var resolved = domainData[0]; // ToDo: round-robin balancing
@@ -403,7 +462,8 @@ onmessage = function(event) {
 	else {
 	  dump("ConnectionWorker non-Namecoin host '" + destination.host + "'\n");
 	}
-	
+
+    //Get current proxy settings
 	var new_proxy = event.data.proxy;
 	
 	// ToDo: nest the below if statements
@@ -428,14 +488,16 @@ onmessage = function(event) {
 	dump("ConnectionWorker connecting client socket to " + resolvedHost + ":" + destination.port + "\n");
 	
 	
-	
+	//open socket to the address from NMControl
     //targetSocket	   = new ConvergenceClientSocket(destination.host, 
 	targetSocket	   = new ConvergenceClientSocket(resolvedHost, 
 							 destination.port, 
 							 new_proxy);
 
+    //if HTTPS
     if(! destination.passThroughHeaders) {
 
+    //negotiate with target sever & parse cert
     var certificate	= targetSocket.negotiateSSL();
     var certificateInfo    = new CertificateInfo(certificate);
     var certificateCache   = new NativeCertificateCache(event.data.cacheFile, 
@@ -449,6 +511,7 @@ onmessage = function(event) {
 
     CV9BLog.worker_conn('Validity check results:', results);
 
+    // Create a certificate that the browser will consider valid
     // Such override allows totally invalid certificates to be used,
     //  e.g. if CN and SubjectAltNames had nothing to do with the hostname/ip.
     certificateInfo.commonName = new NSS.lib.buffer(
@@ -457,14 +520,17 @@ onmessage = function(event) {
     
     certificateInfo.encodeVerificationDetails(results);
 
-    certificateInfo.encodeVerificationDetails(results);
+    //send cert to client
     this.sendClientResponse(localSocket, certificateManager, certificateInfo);
+
+    //background thread that shuffles data between the server and the client,
     postMessage({
       'clientFd' : Serialization.serializePointer(localSocket.fd),
       'serverFd' : Serialization.serializePointer(targetSocket.fd) });
     certificateCache.close();
 
     }
+    //if plaintext repeat headers
     else {
       targetSocket.writeBytes(NSPR.lib.buffer(destination.passThroughHeaders), destination.passThroughHeaders.length);
 
