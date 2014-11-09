@@ -492,7 +492,9 @@ onmessage = function(event) {
     this.sendClientResponse(localSocket, certificateManager, certificateInfo);
     postMessage({
       'clientFd' : Serialization.serializePointer(localSocket.fd),
-      'serverFd' : Serialization.serializePointer(targetSocket.fd) });
+      'serverFd' : Serialization.serializePointer(targetSocket.fd),
+      'ssl' : true
+    });
     certificateCache.close();
 
     }
@@ -500,7 +502,9 @@ onmessage = function(event) {
       targetSocket.writeBytes(NSPR.lib.buffer(destination.passThroughHeaders), destination.passThroughHeaders.length);
 
       postMessage({'clientFd' : Serialization.serializePointer(localSocket.fd), 
-    	           'serverFd' : Serialization.serializePointer(targetSocket.fd)});
+                   'serverFd' : Serialization.serializePointer(targetSocket.fd),
+                   'ssl' : false
+      });
     }
 
     CV9BLog.worker_conn('Done');

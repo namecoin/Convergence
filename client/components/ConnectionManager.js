@@ -140,7 +140,9 @@ ConnectionManager.prototype.spawnConnection = function(clientSocket) {
     connectionManager.shuffleWorker.postMessage({
       'type' : TYPE_CONNECTION,
       'client' : event.data.clientFd,
-      'server' : event.data.serverFd});
+      'server' : event.data.serverFd,
+      'ssl'    : event.data.ssl
+    });
 
     NSPR.lib.PR_Write(connectionManager.wakeupWrite, connectionManager.buffer, 5);
 
