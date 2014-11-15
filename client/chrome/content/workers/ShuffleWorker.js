@@ -83,7 +83,7 @@ ShuffleWorker.prototype.initialize = function(data) {
 };
 
 function allGoodAuthShuffle(arg, fd, foo, bar) {
-    return 0;
+  return 0;
 }
 
 var callbackFunction;
@@ -92,26 +92,24 @@ ShuffleWorker.prototype.addConnection = function(data) {
   var socketOption = NSPR.types.PRSocketOptionData({'option' : 0, 'value' : 1});
   var client = Serialization.deserializeDescriptor(data.client);
   var server = Serialization.deserializeDescriptor(data.server);
-
+  
+  var status;
+  
   NSPR.lib.PR_SetSocketOption(client, socketOption.address());
   NSPR.lib.PR_SetSocketOption(server, socketOption.address());
   
-  dump("Shuffle checking for SSL...\n");
-  
   if(data.ssl) {
-      var status;
-      
-      dump("SSL detected, setting hook.\n");
-      
+    var status;
+    
+    if (typeof callbackFunction === 'undefined') {
       callbackFunction = SSL.types.SSL_AuthCertificate(allGoodAuthShuffle);
-      
-      status = SSL.lib.SSL_AuthCertificateHook(server, callbackFunction, null);
-      
-      if (status == -1) throw 'Error setting auth certificate hook in ShuffleWorker!';
-      
-  }
-  else {
-      dump("Not SSL\n");
+    }
+    
+    status = SSL.lib.SSL_AuthCertificateHook(server, callbackFunction, null);
+    
+    if (status == -1) {
+      throw 'Error setting auth certificate hook in ShuffleWorker!';
+    }
   }
 
   this.connectionPairs.push(new ShuffleWorkerItem(client, server));
