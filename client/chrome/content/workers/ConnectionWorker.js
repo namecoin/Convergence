@@ -62,9 +62,9 @@ function sendClientResponse(localSocket, certificateManager, certificateInfo) {
 };
 
 function waitForInput2(fd, timeoutMillis) {
-  var pollfds_t        = ctypes.ArrayType(NSPR.types.PRPollDesc);
-  var pollfds          = new pollfds_t(1);
-  pollfds[0].fd        = fd;
+  var pollfds_t	= ctypes.ArrayType(NSPR.types.PRPollDesc);
+  var pollfds	  = new pollfds_t(1);
+  pollfds[0].fd	= fd;
   pollfds[0].in_flags  = NSPR.lib.PR_POLL_READ | NSPR.lib.PR_POLL_EXCEPT | NSPR.lib.PR_POLL_ERR;
   pollfds[0].out_flags = 0;
 
@@ -77,19 +77,7 @@ function waitForInput2(fd, timeoutMillis) {
   return true;
 };
 
-/* Sanitise certificate fingerprint for string comparison.  This transforms
-   everything to upper case and removes all colons.  */
-function sanitiseFingerprint (fpr)
-{
-  var withoutColons = fpr.replace (/:/g, "");
-  var res = withoutColons.toUpperCase ();
-
-  dump ("Sanitised fingerprint: " + fpr + " -> " + res + "\n");
-
-  return res;
-};
-
-function getNamecoinDnsField(host, method, settings) {
+function getNamecoinDnsField(host, method, params, settings) {
   
     // Mostly adapted from ConvergenceClientSocket.js
 
@@ -142,7 +130,10 @@ function getNamecoinDnsField(host, method, settings) {
   
   // Fixed for new nmcontrol
   //var writeString = '{"params": ["getValue", "d/' + hostSplit[1] + '"], "method": "data", "id": 1}'; 
-  var writeString = '{"params": ["' + method + '", "' + host + '"], "method": "dns", "id": 1}'; 
+  var writeObj = {method: "dns", id: 1};
+  writeObj.params = [method, host].concat(params);
+  var writeString = JSON.stringify(writeObj);
+  dump("writing data to nmcontrol:\n" + writeString + "\n");
 
   NSPR.lib.PR_Write(fd, NSPR.lib.buffer(writeString), writeString.length);
   
@@ -178,7 +169,7 @@ function getNamecoinDnsField(host, method, settings) {
 
 function getNamecoinIp4(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getIp4", settings);
+  var domainData = getNamecoinDnsField(host, "getIp4", [], settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -194,7 +185,7 @@ function getNamecoinIp4(host, settings) {
 
 function getNamecoinIp6(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getIp6", settings);
+  var domainData = getNamecoinDnsField(host, "getIp6", [], settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -210,7 +201,7 @@ function getNamecoinIp6(host, settings) {
 
 function getNamecoinTor(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getOnion", settings);
+  var domainData = getNamecoinDnsField(host, "getOnion", [], settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -226,7 +217,7 @@ function getNamecoinTor(host, settings) {
 
 function getNamecoinI2p(host, settings) {
 
-  var domainData = getNamecoinDnsField(host, "getI2p_b32", settings);
+  var domainData = getNamecoinDnsField(host, "getI2p_b32", [], settings);
 
   // returns empty array when no IP found
   if(! (domainData instanceof Array && ! domainData[0] ) ) {
@@ -289,28 +280,6 @@ function getNamecoinResolution(host, settings) {
   
 };
 
-function getNamecoinFingerprint(host, settings) {
-
-  var domainData = getNamecoinDnsField(host, "getFingerprint", settings);
-  
-  // returns empty array when no fingerprint found
-  if(! (domainData instanceof Array && ! domainData[0] ) ) {
-    dump("Found fingerprint in blockchain.\n");
-    // transform all fingerprints to uppercase and remove colons
-    if (domainData instanceof Array) {
-        domainData = domainData.map(sanitiseFingerprint);
-    } else if (domainData instanceof String) {
-        domainData = sanitiseFingerprint (domainData);
-    }
-    return domainData;
-  }
-  else {
-    dump("No fingerprint in blockchain!\n");
-    return null;
-  }
-  
-};
-
 function checkCertificateValidity(
   certificateCache, activeNotaries, host, port, ip,
   certificateInfo, privatePkiExempt, namecoinBlockchain, settings)
@@ -324,8 +293,8 @@ function checkCertificateValidity(
       'target' : target,
       'certificate' : certificateInfo.original,
       'details' : [{
-        'notary' : 'Local PKI',
-        'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS }] };
+	'notary' : 'Local PKI',
+	'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS }] };
   }
 
   CV9BLog.worker_conn('Checking certificate cache: ' + certificateInfo.sha1);
@@ -336,17 +305,17 @@ function checkCertificateValidity(
       'target' : target,
       'certificate' : certificateInfo.original,
       'details' : [{
-        'notary' : 'Certificate Cache',
-        'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS }] };
+	'notary' : 'Certificate Cache',
+	'status' : ConvergenceResponseStatus.VERIFICATION_SUCCESS }] };
 
   if(namecoinBlockchain && host.substr(-4) == ".bit") {
     dump("Checking Namecoin blockchain...\n");
 	
-	var namecoinFingerprints = getNamecoinFingerprint (host, settings);
-        var wantedFingerprint = sanitiseFingerprint (certificateInfo.sha1);
-	
-	if (namecoinFingerprints instanceof Array
-            && namecoinFingerprints.indexOf (wantedFingerprint) !== -1)
+	var fprOk = getNamecoinDnsField(host, "verifyFingerprint",
+					[certificateInfo.sha1], settings);
+	dump("Result of verifyFingerprint: " + fprOk + "\n");
+
+	if (fprOk)
 	{
 		dump("Fingerprint matched blockchain.\n");
 	
@@ -399,8 +368,8 @@ onmessage = function(event) {
 
     var certificateManager = new CertificateManager(event.data.certificates);
     var activeNotaries     = new ActiveNotaries(event.data.settings, event.data.notaries);
-    localSocket            = new ConvergenceServerSocket(null, event.data.clientSocket);
-    var destination        = new HttpProxyServer(localSocket).getConnectDestination();
+    localSocket	    = new ConvergenceServerSocket(null, event.data.clientSocket);
+    var destination	= new HttpProxyServer(localSocket).getConnectDestination();
 	
 	var resolvedHost = destination.host;
 	
@@ -409,26 +378,26 @@ onmessage = function(event) {
 	  dump("Resolving .bit host " + destination.host + ":" + (destination.port) + "...\n");
 	
       try {
-        
-        var domainData = getNamecoinResolution(destination.host, event.data.settings);
-      	
-        var resolved = domainData[0]; // ToDo: round-robin balancing
 	
-        dump("Resolved record: " + resolved + "\n");
-        
-        resolvedHost = resolved;
+	var domainData = getNamecoinResolution(destination.host, event.data.settings);
+      	
+	var resolved = domainData[0]; // ToDo: round-robin balancing
+	
+	dump("Resolved record: " + resolved + "\n");
+	
+	resolvedHost = resolved;
 
-        } catch(e) {
+	} catch(e) {
 
-            // .bit DNS resolution error
+	    // .bit DNS resolution error
 
-            localSocket.close();
+	    localSocket.close();
 
-            postMessage({'namecoinError' : e});
+	    postMessage({'namecoinError' : e});
 
-            return;
+	    return;
 
-        }
+	}
 
 	}
 	else {
@@ -442,32 +411,32 @@ onmessage = function(event) {
 	
 	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit" && resolvedHost.substr(-6) == ".onion") {
 	  
-          new_proxy = {
-            'host' : event.data.settings['proxyTorHost'],
-            'port' : event.data.settings['proxyTorPort'],
-            'type' : event.data.settings['proxyTorProtocol'] };
+	  new_proxy = {
+	    'host' : event.data.settings['proxyTorHost'],
+	    'port' : event.data.settings['proxyTorPort'],
+	    'type' : event.data.settings['proxyTorProtocol'] };
 	}
 	
 	if(event.data.settings['namecoinResolve'] && destination.host.substr(-4) == ".bit" && resolvedHost.substr(-4) == ".i2p") {
 	  
-          new_proxy = {
-            'host' : event.data.settings['proxyI2pHost'],
-            'port' : event.data.settings['proxyI2pPort'],
-            'type' : event.data.settings['proxyI2pProtocol'] };
+	  new_proxy = {
+	    'host' : event.data.settings['proxyI2pHost'],
+	    'port' : event.data.settings['proxyI2pPort'],
+	    'type' : event.data.settings['proxyI2pProtocol'] };
 	}
 	
 	dump("ConnectionWorker connecting client socket to " + resolvedHost + ":" + destination.port + "\n");
 	
 	
 	
-    //targetSocket           = new ConvergenceClientSocket(destination.host, 
-	targetSocket           = new ConvergenceClientSocket(resolvedHost, 
+    //targetSocket	   = new ConvergenceClientSocket(destination.host, 
+	targetSocket	   = new ConvergenceClientSocket(resolvedHost, 
 							 destination.port, 
 							 new_proxy);
 
     if(! destination.passThroughHeaders) {
 
-    var certificate        = targetSocket.negotiateSSL();
+    var certificate	= targetSocket.negotiateSSL();
     var certificateInfo    = new CertificateInfo(certificate);
     var certificateCache   = new NativeCertificateCache(event.data.cacheFile, 
 							event.data.settings['cacheCertificatesEnabled']);
