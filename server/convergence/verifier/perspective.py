@@ -32,9 +32,17 @@ import os, re, logging
 log = logging.getLogger(__name__)
 
 
-# It's not critical, but includes mozilla certs for major legit hosts like akamai
-ca_certs_pem = '/etc/ssl/certs/ca-certificates.crt'
-if not os.path.exists(ca_certs_pem): ca_certs_pem = None
+# None = use OpenSSL defaults
+ca_certs_pem = None
+
+# Prefer Mozilla Certs from https://pypi.python.org/pypi/certifi/, if available
+try: import certifi
+except ImportError: pass
+else: ca_certs_pem = certifi.where()
+
+# Includes mozilla certs for major legit hosts like akamai - http://www.cacert.org/
+cacert_pem = '/etc/ssl/certs/ca-certificates.crt'
+if os.path.exists(cacert_pem): ca_certs_pem = cacert_pem
 
 
 class NetworkPerspectiveVerifier(Verifier):
@@ -91,7 +99,7 @@ class NetworkPerspectiveVerifier(Verifier):
             bind = self.opts['bind'].rsplit(':', 1)
             self.opts['bind'] = (bind[0], int(bind[1])) if len(bind) != 1 else (bind[0], 0)
 
-        log.debug('Options: {}'.format(self.opts))
+        log.debug('Options: %s', self.opts)
 
     def verify(self, host, port, address, fingerprint, log):
         deferred = defer.Deferred()
@@ -101,7 +109,7 @@ class NetworkPerspectiveVerifier(Verifier):
             hostname=host if not re.search(r'^(\d+\.){3}\d+$', host) else None )
         factory = CertificateFetcherClientFactory(deferred, host, port, factory_ctx, log)
 
-        log.debug('Fetching certificate from: {}:{}'.format(host, port))
+        log.debug('Fetching certificate from: %s:%s', host, port)
 
         reactor.connectSSL( address or host, port,
             factory, factory_ctx, bindAddress=self.opts['bind'] )
@@ -111,7 +119,7 @@ class NetworkPerspectiveVerifier(Verifier):
 class CertificateFetcherClient(Protocol):
 
     def connectionMade(self):
-        self.log.debug('Connected to {}'.format(self.transport.getPeer()))
+        self.log.debug('Connected to %s', self.transport.getPeer())
 
 
 class CertificateFetcherError(Exception): pass
@@ -216,7 +224,7 @@ class CertificateContextFactory(ssl.ContextFactory):
 
     def verifyCertificate(self, connection, x509, errno, depth, preverify_ok):
         if depth != 0: return True
-        self.log.debug('Verifying certificate (ca check: {})'.format(preverify_ok))
+        self.log.debug('Verifying certificate (ca check: %s)', preverify_ok)
 
         try:
             fingerprintSeen = x509.digest('sha1')\
@@ -226,7 +234,7 @@ class CertificateContextFactory(ssl.ContextFactory):
                 if self.verify_ca and (self.hostname or self.address):
                     try: match_x509(x509, self.hostname, self.address)
                     except CertificateError as err:
-                        self.log.debug('Failed to match certificate against hostname: {}'.format(err))
+                        self.log.debug('Failed to match certificate against hostname: %s', err)
                         fingerprintSeen = None # so that it won't get cached
                         raise
                 self.deferred.callback((200, fingerprintSeen))
