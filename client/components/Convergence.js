@@ -27,6 +27,223 @@
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/ctypes.jsm');
 
+function getWscriptPath() {
+
+  if(Services.appinfo.OS == 'WINNT') {
+    var wscript_path = false;
+    
+    wscript_path = Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties).get("SysD", Components.interfaces.nsILocalFile);
+    wscript_path.append("wscript.exe");
+    
+    return wscript_path.clone();
+  }
+  
+  return false;
+}
+
+function getDaemonsDirectory() {
+  var daemons = Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile);
+  daemons.append("extensions");
+  daemons.append("convergence@dot-bit.org"); // guid of extension
+  
+  daemons.append("daemons");
+  
+  return daemons.clone();
+}
+
+function getNamecoindPath() {
+  var namecoind_path = getDaemonsDirectory();
+
+  namecoind_path.append("namecoind");
+  
+  if (Services.appinfo.OS != 'WINNT') {
+    dump("Linux in use\n");
+    namecoind_path.append("linux");
+    namecoind_path.append("x64");
+    namecoind_path.append("namecoind");
+  }
+  else {
+    dump("Windows in use\n");
+    namecoind_path.append("windows");
+    namecoind_path.append("x64");
+    namecoind_path.append("namecoind.exe");
+  }
+  
+  if(! namecoind_path.exists()) {
+    dump("namecoind is missing!\n");
+  }
+  
+  return namecoind_path.clone();
+}
+
+function getInvisibleNamecoindPath() {
+  var invisible_namecoind_path = getDaemonsDirectory();
+  
+  invisible_namecoind_path.append("namecoind");
+  
+  if (Services.appinfo.OS == 'WINNT') {
+    invisible_namecoind_path.append("windows");
+    invisible_namecoind_path.append("x64");
+    invisible_namecoind_path.append("invisible_namecoind.vbs");
+    
+    return invisible_namecoind_path.clone();
+  }
+  
+  return false;
+}
+
+function getNmcontrolPath() {
+  var nmcontrol_path = getDaemonsDirectory();
+  
+  nmcontrol_path.append("nmcontrol");
+  
+  if (Services.appinfo.OS != 'WINNT') {
+    dump("Linux in use\n");
+    nmcontrol_path.append("python");
+    nmcontrol_path.append("cd_launcher.sh");
+  }
+  else {
+    dump("Windows in use\n");
+    nmcontrol_path.append("windows");
+    nmcontrol_path.append("cd_launcher.bat");
+  }
+  
+  if(! nmcontrol_path.exists()) {
+    dump("nmcontrol launch script is missing!\n");
+  }
+  
+  return nmcontrol_path.clone();
+}
+
+function getInvisibleNmcontrolPath() {
+  var invisible_nmcontrol_path = getDaemonsDirectory();
+  
+  invisible_nmcontrol_path.append("nmcontrol");
+  
+  if (Services.appinfo.OS == 'WINNT') {
+    invisible_nmcontrol_path.append("windows");
+    invisible_nmcontrol_path.append("invisible_nmcontrol.vbs");
+    
+    return invisible_nmcontrol_path.clone();
+  }
+  
+  return false;
+}
+
+function getNamecoinConfStr() {
+  var namecoin_conf = getNmcontrolPath().parent.parent.clone().path;
+  
+  if (Services.appinfo.OS != 'WINNT') {
+    dump("Linux in use\n");
+    namecoin_conf = namecoin_conf + '/namecoin.conf';
+  }
+  else {
+    dump("Windows in use\n");
+    namecoin_conf = namecoin_conf + '\\namecoin.conf';
+  }
+  
+  return namecoin_conf;
+}
+
+function getNamecoindProfileDirectoryStr() {
+  // Create the namecoind profile directory if it's not already there
+  Components.utils.import("resource://gre/modules/FileUtils.jsm");
+  var namecoind_profile_dir = FileUtils.getDir("Home", [".convergence-namecoin"], true).path;
+  
+  return namecoind_profile_dir;
+}
+
+function setNamecoindState(enabled) {
+  
+  var namecoind_path = getNamecoindPath();
+  var namecoind_profile_dir = getNamecoindProfileDirectoryStr();
+  
+  var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+  
+  var proc_arguments = [];
+  
+  if (Services.appinfo.OS != 'WINNT') {
+    dump("Linux in use\n");
+    
+    dump("namecoind path: " + namecoind_path.path + "\n");
+    process.init(namecoind_path);
+    
+    proc_arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-port=18834', '-rpcport=18835'] ; // command line arguments array
+    if(!enabled) {
+      proc_arguments.push('stop');
+    }
+  }
+  else {
+    dump("Windows in use\n");
+    
+    var wscript_path = getWscriptPath();
+    var invisible_namecoind_path = getInvisibleNamecoindPath();
+    
+    dump("namecoind path: " + wscript_path.path + "\n");
+    process.init(wscript_path);
+    
+    proc_arguments= [invisible_namecoind_path.path, '\'' + namecoind_path.path + '\'' + ' -datadir=\'' + namecoind_profile_dir + '/\' -server -rpcuser=convergence -rpcpassword=convergence -port=18834 -rpcport=18835'] ; // command line arguments array        
+    if(!enabled) {
+      proc_arguments[1] = proc_arguments[1] + ' stop';
+    }
+  }
+          
+  dump("namecoind args: " + proc_arguments.join(" ") + "\n");
+  process.run(false, proc_arguments, proc_arguments.length); 
+  
+  if(enabled) {
+    dump("namecoind started.\n");
+  }
+  else {
+    dump("namecoind stopped.\n");
+  }
+}
+
+function setNmcontrolState(enabled) {
+  
+  var nmcontrol_path = getNmcontrolPath();
+  var namecoin_conf = getNamecoinConfStr();
+  
+  var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
+  
+  var proc_arguments = [];
+  
+  if (Services.appinfo.OS != 'WINNT') {
+    dump("Linux in use\n");
+    
+    dump("nmcontrol path: " + nmcontrol_path.path + "\n");
+    process.init(nmcontrol_path);
+    
+    proc_arguments= [nmcontrol_path.parent.clone().path, 'python2 nmcontrol.py --daemon=0 --data.update.namecoin="' + namecoin_conf + '" --rpc.port=18836 --dns.port=18837 --http.port=18838'] ; // command line arguments array
+    if(!enabled) {
+      proc_arguments[1] = proc_arguments[1] + ' stop';
+    }    
+  }
+  else {
+    dump("Windows in use\n");
+    
+    var wscript_path = getWscriptPath();
+    var invisible_nmcontrol_path = getInvisibleNmcontrolPath();
+    
+    dump("nmcontrol path: " + wscript_path.path + "\n");
+    process.init(wscript_path);
+    
+    proc_arguments= [invisible_nmcontrol_path.path, '\'' + nmcontrol_path.path + '\' \'' + nmcontrol_path.parent.clone().path + '\' nmcontrol.exe --daemon=0 \'--data.update.namecoin=' + namecoin_conf + '\' \'--rpc.port=18836\' \'--dns.port=18837\' \'--http.port=18838\''] ; // command line arguments array
+    if(!enabled) {
+      proc_arguments[1] = proc_arguments[1] + ' stop';
+    }
+  }
+  
+  dump("nmcontrol args: " + proc_arguments.join(" ") + "\n");
+  process.run(false, proc_arguments, proc_arguments.length); 
+    
+  if(enabled) {
+    dump("nmcontrol started.\n");
+  }
+  else {
+    dump("nmcontrol stopped.\n");
+  }
+}
 
 function Convergence() {
   try {
@@ -218,104 +435,8 @@ Convergence.prototype = {
     
     if(this.settingsManager.getDaemonMode() == "namecoind-nmcontrol") {
       
-      var namecoind_path = __LOCATION__.parent.parent.clone();
-      
-      namecoind_path.append("daemons");
-      namecoind_path.append("namecoind");
-      
-      if (Services.appinfo.OS != 'WINNT') {
-        dump("Linux in use\n");
-        namecoind_path.append("linux");
-        namecoind_path.append("x64");
-        namecoind_path.append("namecoind");
-      }
-      else {
-        dump("Windows in use\n");
-        namecoind_path.append("windows");
-        namecoind_path.append("x64");
-        namecoind_path.append("namecoind.exe");
-      }
-      
-      dump("namecoind path: " + namecoind_path.path + "\n");
-      dump("namecoind exists: " + namecoind_path.exists() + "\n");
-      
-      if(namecoind_path.exists()) {
-        
-        // Create the namecoind profile directory if it's not already there
-        Components.utils.import("resource://gre/modules/FileUtils.jsm");
-        var namecoind_profile_dir = FileUtils.getDir("Home", [".convergence-namecoin"], true).path;
-        
-        dump("namecoind profile dir: " + namecoind_profile_dir + "\n");
-        
-        // Start namecoind
-        var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
-        process.init(namecoind_path);
-        if (Services.appinfo.OS != 'WINNT') {
-          dump("Linux in use\n");
-          var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835'] ; // command line arguments array
-        }
-        else {
-          dump("Windows in use\n");
-          var arguments= ['-datadir=' + namecoind_profile_dir + '\\', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835'] ; // command line arguments array
-        }
-        process.run(false, arguments, arguments.length); 
-        dump("namecoind started.\n");
-      }
-      else {
-        dump("namecoind not found.\n");
-      }
-      
-      var nmcontrol_path = __LOCATION__.parent.parent.clone();
-      
-      nmcontrol_path.append("daemons");
-      nmcontrol_path.append("nmcontrol");
-      
-      if (Services.appinfo.OS != 'WINNT') {
-        dump("Linux in use");
-        nmcontrol_path.append("python");
-        nmcontrol_path.append("cd_launcher.sh");
-      }
-      else {
-        dump("Windows in use");
-        nmcontrol_path.append("windows");
-        nmcontrol_path.append("cd_launcher.bat");
-      }
-      
-      dump("nmcontrol path: " + nmcontrol_path.path + "\n");
-      dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
-      
-      if(nmcontrol_path.exists()) {
-      
-        // Create the namecoind profile directory if it's not already there
-        Components.utils.import("resource://gre/modules/FileUtils.jsm");
-        var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
-        if (Services.appinfo.OS != 'WINNT') {
-          dump("Linux in use\n");
-          namecoin_conf = namecoin_conf + '/namecoin.conf';
-        }
-        else {
-          dump("Windows in use\n");
-          namecoin_conf = namecoin_conf + '\\namecoin.conf';
-        }
-        
-        // Start nmcontrol
-        var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
-        process.init(nmcontrol_path);
-        if (Services.appinfo.OS != 'WINNT') {
-          dump("Linux in use\n");
-          var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836'] ; // command line arguments array
-        }
-        else {
-          dump("Windows in use\n");
-          var arguments= [nmcontrol_path.parent.clone().path, 'nmcontrol.exe --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836'] ; // command line arguments array
-        }
-        process.run(false, arguments, arguments.length); 
-        dump("nmcontrol started.\n");
-      }
-      else {
-        dump("nmcontrol not found.\n");
-      }
-      
+      setNamecoindState(true);
+      setNmcontrolState(true);
       
     }
   },
@@ -380,103 +501,8 @@ Convergence.prototype = {
         this.connectionManager.shutdown();
       if(this.settingsManager.getDaemonStop() || (this.settingsManager.getDaemonMode() != "namecoind-nmcontrol") ) {
         
-        var namecoind_path = __LOCATION__.parent.parent.clone();
-        
-        namecoind_path.append("daemons");
-        namecoind_path.append("namecoind");
-       
-        if (Services.appinfo.OS != 'WINNT') {
-          dump("Linux in use\n");
-          namecoind_path.append("linux");
-          namecoind_path.append("x64");
-          namecoind_path.append("namecoind");
-        }
-        else {
-          dump("Windows in use\n");
-          namecoind_path.append("windows");
-          namecoind_path.append("x64");
-          namecoind_path.append("namecoind.exe");
-        }
-        
-        dump("namecoind path: " + namecoind_path.path + "\n");
-        dump("namecoind exists: " + namecoind_path.exists() + "\n");
-        
-        if(namecoind_path.exists()) {
-          
-          // Create the namecoind profile directory if it's not already there
-          Components.utils.import("resource://gre/modules/FileUtils.jsm");
-          var namecoind_profile_dir = FileUtils.getDir("Home", [".convergence-namecoin"], true).path;
-          
-          dump("namecoind profile dir: " + namecoind_profile_dir + "\n");
-          
-          // Stop namecoind
-          var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
-          process.init(namecoind_path);
-          if (Services.appinfo.OS != 'WINNT') {
-            dump("Linux in use\n");
-            var arguments= ['-datadir=' + namecoind_profile_dir + '/', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835', 'stop'] ; // command line arguments array
-          }
-          else {
-            dump("Windows in use\n");
-            var arguments= ['-datadir=' + namecoind_profile_dir + '\\', '-server', '-rpcuser=convergence', '-rpcpassword=convergence', '-rpcport=18835', 'stop'] ; // command line arguments array
-          }
-          process.run(false, arguments, arguments.length); 
-          dump("namecoind stopped.\n");
-        }
-        else {
-          dump("namecoind not found.\n");
-        }
-        
-        var nmcontrol_path = __LOCATION__.parent.parent.clone();
-      
-        nmcontrol_path.append("daemons");
-        nmcontrol_path.append("nmcontrol");
-       
-        if (Services.appinfo.OS != 'WINNT') {
-          dump("Linux in use");
-          nmcontrol_path.append("python");
-          nmcontrol_path.append("cd_launcher.sh");
-        }
-        else {
-          dump("Windows in use");
-          nmcontrol_path.append("windows");
-          nmcontrol_path.append("cd_launcher.bat");
-        }
-        
-        dump("nmcontrol path: " + nmcontrol_path.path + "\n");
-        dump("nmcontrol exists: " + nmcontrol_path.exists() + "\n");
-        
-        if(nmcontrol_path.exists()) {
-        
-          // Create the namecoind profile directory if it's not already there
-          Components.utils.import("resource://gre/modules/FileUtils.jsm");
-          var namecoin_conf = nmcontrol_path.parent.parent.clone().path;
-          if (Services.appinfo.OS != 'WINNT') {
-            dump("Linux in use\n");
-            namecoin_conf = namecoin_conf + '/namecoin.conf';
-          }
-          else {
-            dump("Windows in use\n");
-            namecoin_conf = namecoin_conf + '\\namecoin.conf';
-          }
-          
-          // Stop nmcontrol
-          var process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
-          process.init(nmcontrol_path);
-          if (Services.appinfo.OS != 'WINNT') {
-            dump("Linux in use\n");
-            var arguments= [nmcontrol_path.parent.clone().path, './nmcontrol.py --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836 stop'] ; // command line arguments array
-          }
-          else {
-            dump("Windows in use\n");
-            var arguments= [nmcontrol_path.parent.clone().path, 'nmcontrol.exe --daemon=0 --data.update.namecoin=' + namecoin_conf + ' --rpc.port=18836 stop'] ; // command line arguments array
-          }
-          process.run(false, arguments, arguments.length); 
-          dump("nmcontrol stopped.\n");
-        }
-        else {
-          dump("nmcontrol not found.\n");
-        }
+        setNamecoindState(false);
+        setNmcontrolState(false);
           
       }
     } else if (topic == 'network:offline-status-changed') {
