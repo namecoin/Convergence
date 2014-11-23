@@ -1,0 +1,20 @@
+/* global skin ------------------------------------------------------------- */
+@import url(chrome://global/skin/);
+
+/* toolbar ----------------------------------------------------------------- */
+
+toolbar[mode="icons"] .toolbarbutton-text {
+  display: none !important;
+}
+
+toolbar[mode="text"] .toolbarbutton-icon {
+  display: none;
+}
+
+toolbarbutton {
+  -moz-box-orient: vertical;
+}
+
+
+
+
