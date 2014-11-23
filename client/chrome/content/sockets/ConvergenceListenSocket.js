@@ -34,7 +34,7 @@ function ConvergenceListenSocket(serialized) {
   } else {
     var addr = NSPR.types.PRNetAddr();
     NSPR.lib.PR_SetNetAddr(
-      NSPR.lib.PR_IpAddrLoopback, NSPR.lib.PR_AF_INET, 0, addr.address() );
+      NSPR.lib.PR_IpAddrLoopback, NSPR.lib.PR_AF_INET, 18833, addr.address() ); // Hardcode port for XULRunner
 
     var fd = NSPR.lib.PR_OpenTCPSocket(NSPR.lib.PR_AF_INET);
     var status = NSPR.lib.PR_Bind(fd, addr.address());

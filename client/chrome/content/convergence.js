@@ -89,6 +89,11 @@ var Convergence = {
   },
 
   initializeTabWatcher: function() {
+    if(typeof gBrowser === 'undefined') {
+        CV9BLog.ui("No gBrowser, you're probably running XULRunner...");
+        return; // XULRunner compatibility
+    }
+    
     var container = gBrowser.tabContainer;
     var convergence = this;
 
