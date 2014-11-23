@@ -100,6 +100,7 @@ NSPR.initialize = function(nsprPath) {
   NSPR.lib = {
     PR_TRUE : 1,
     PR_FALSE : 0,
+
     PR_AF_INET : 2,
     PR_AI_ADDRCONFIG : 32,
     PR_IpAddrAny : 1,
@@ -130,6 +131,10 @@ NSPR.initialize = function(nsprPath) {
     PR_IN_PROGRESS : -5934,
     PR_SockOpt_NoDelay : 13,
 
+    PR_StandardInput : 0,
+    PR_StandardOutput : 1,
+    PR_StandardError : 2,
+
     buffer : ctypes.ArrayType(ctypes.char),
     unsigned_buffer : ctypes.ArrayType(ctypes.unsigned_char),
 
@@ -147,6 +152,11 @@ NSPR.initialize = function(nsprPath) {
                                 ctypes.default_abi,
                                 ctypes.void_t,
                                 ctypes.voidptr_t),
+
+    PR_GetSpecialFD : sharedLib.declare('PR_GetSpecialFD',
+                                    ctypes.default_abi,
+                                    NSPR.types.PRFileDesc.ptr,
+                                    ctypes.int32_t ),
 
     PR_CreatePipe : sharedLib.declare('PR_CreatePipe',
                                       ctypes.default_abi,

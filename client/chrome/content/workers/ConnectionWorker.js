@@ -472,7 +472,9 @@ onmessage = function(event) {
     this.sendClientResponse(localSocket, certificateManager, certificateInfo);
     postMessage({
       'clientFd' : Serialization.serializePointer(localSocket.fd),
-      'serverFd' : Serialization.serializePointer(targetSocket.fd) });
+      'serverFd' : Serialization.serializePointer(targetSocket.fd),
+      'ssl' : true
+    });
     certificateCache.close();
 
     }
@@ -481,14 +483,16 @@ onmessage = function(event) {
       targetSocket.writeBytes(NSPR.lib.buffer(destination.passThroughHeaders), destination.passThroughHeaders.length);
 
       postMessage({'clientFd' : Serialization.serializePointer(localSocket.fd), 
-    		   'serverFd' : Serialization.serializePointer(targetSocket.fd)});
+                   'serverFd' : Serialization.serializePointer(targetSocket.fd),
+                   'ssl' : false
+      });
     }
 
-    CV9BLog.worker_conn('done');
+    CV9BLog.worker_conn('Done');
   } catch (e) {
-    CV9BLog.worker_conn('exception - ' + e + ', ' + e.stack);
+    CV9BLog.worker_conn.error(e);
     if (localSocket != null) localSocket.close();
     if (targetSocket != null) targetSocket.close();
-    CV9BLog.worker_conn('moving on from exception...');
+    CV9BLog.worker_conn('Moving on from exception...');
   }
 };
